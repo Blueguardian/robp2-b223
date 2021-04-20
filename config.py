@@ -7,7 +7,7 @@ class CaseConfig:
 
     # if you want only a set of colours to be available
     _ALLOWED_COLOURS = ['white', 'blue', 'black']
-    _ALLOWED_CURVES = ['none', 'sides', 'curved']
+    _ALLOWED_CURVES = ['none', 'edge', 'curved']
 
     @classmethod
     def __open_config(cls) -> ConfigParser:
@@ -60,7 +60,5 @@ class CaseConfig:
     @classmethod
     def engrave(cls):
         engrave_bool = cls.__open_config().getboolean('costumer', 'engrave')
-
-        #Error handling, validation or mutation
 
         return engrave_bool
