@@ -1,37 +1,25 @@
-# The following file contains code made by ROB2 - B223
-# 2. Semester AAU 2021.
-
 import os
+
 from configparser import ConfigParser
 
 
 class CaseConfig:
-    # Global variables
-    # Set allowed values for covers
+
+    # if you want only a set of colours to be available
     _ALLOWED_COLOURS = ['white', 'blue', 'black']
     _ALLOWED_CURVES = ['none', 'edge', 'curved']
 
     @classmethod
     def __open_config(cls) -> ConfigParser:
-        """
-        Accesses the config file and creates a ConfigParser object to read the file
-        :return: The ConfigParser object
-        """
         cfg = ConfigParser()
         cfg.read('config.ini')
         return cfg
 
     @classmethod
-    def colour(cls, type_='customer'):
-        """
-        Static class method
-        Checks the value at 'colour' from the config file
-        :param type_: string default 'customer' can be 'default'
-        :return: string contained in key 'colour'
-        """
-        colour_id = cls.__open_config().get(type_, 'colour')
+    def colour(cls):
+        colour_id = cls.__open_config().get('costumer', 'colour')
 
-        # if we decide to use hex strings instead of colour names, use re to ensure it is valid
+        # if you decide to use hex strings instead of colour names, use re to ensure it is valid
         # import re
         #
         # if not re.match('[a-fA-F0-9]', colour_id'):
@@ -48,14 +36,8 @@ class CaseConfig:
         return colour_id
 
     @classmethod
-    def curve_style(cls, type_='customer'):
-        """
-        Static class method
-        Checks the value at 'curve_style' from the config file
-        :param type_: string default 'customer' can be 'default'
-        :return: string contained in key 'curve_style'
-        """
-        curve_style_id = cls.__open_config().get(type_, 'curve_style')
+    def curve_style(cls):
+        curve_style_id = cls.__open_config().get('costumer', 'curve_style')
 
         if curve_style_id not in cls._ALLOWED_CURVES:
             raise KeyError('Error, curve style is not available.')
@@ -65,14 +47,8 @@ class CaseConfig:
         return curve_style_id
 
     @classmethod
-    def file(cls, type_='customer'):
-        """
-        Static class method
-        Checks the value at 'file' from the config file
-        :param type_: string default 'customer' can be 'default'
-        :return: string contained in key 'file'
-        """
-        file_path = cls.__open_config().get(type_, 'file')
+    def file(cls):
+        file_path = cls.__open_config().get('costumer', 'file')
 
         if not os.path.isfile(file_path):
             raise FileNotFoundError('Error, file does not exist.')
@@ -82,16 +58,7 @@ class CaseConfig:
         return file_path
 
     @classmethod
-    def engrave(cls, type_='customer'):
-        """
-        Static class method
-        Checks the value 'engrave' from the config file
-        :param type_: string default 'customer' can be 'default'
-        :return: boolean value in key 'engrave'
-        """
-        engrave_bool = cls.__open_config().getboolean(type_, 'engrave')
-
-        if type(engrave_bool) != bool:
-            raise KeyError('Error, not a boolean type')
+    def engrave(cls):
+        engrave_bool = cls.__open_config().getboolean('costumer', 'engrave')
 
         return engrave_bool
