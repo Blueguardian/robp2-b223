@@ -1,6 +1,12 @@
-import robodk.robodk
-import robolink.robolink
-from stock import Stock
+# The following file contains code made by ROB2 - B223
+# 2. Semester AAU 2021.
+# The following file has no copyright and can be used freely
+# Credit is expected when used commercially
+
+# Imports for class
+from robolink.robolink import Robolink, ITEM_TYPE_ROBOT# Import robolink library object
+from stock import Stock  # Import class Stock from stock
+from config import CaseConfig
 
 
 class Cover:
@@ -10,7 +16,8 @@ class Cover:
     _OFFSETZ_COVER_DIST = 11.7  # Offset in z-direction in mm (Cover depth)
     _COVER_CAPACITY = 10  # Cover capacity for calculations
     _APPROACH = 100 # Approach to objects in mm
-    RDK = robolink.robolink.Robolink() # Establish contact to RoboDK
+    _ROBOT_HOME = [0, 0, 0, 90, 0, 0,]
+    RDK = Robolink() # Establish contact to RoboDK
 
     # Constructor:
     # for class cover
@@ -19,10 +26,11 @@ class Cover:
     # for the object to use when giving positions to
 
     def __init__(self, color, curve_type, stock: Stock):
-        self.color = color # Assigning the given color string to an object field of name color
-        self.curve = curve_type # Assigning the given curve string to an object field of name curve
-        self.stock = stock # Assigning the given stock object to an object field of name stock
+        self.color = color  # Assigning the given color string to an object field of name color
+        self.curve = curve_type  # Assigning the given curve string to an object field of name curve
+        self.stock = stock  # Assigning the given stock object to an object field of name stock
         self.position = [73, self._OFFSETY_COVER_DIST, 130, 0, 0, 0]  # Initialize list with y-position of cover
+        self.correct_pos(self.stock)
 
     #
 
@@ -65,7 +73,7 @@ class Cover:
         carrier_offsetz = 41.5
         position_withoffset_app = [carrier_offsetx, carrier_offsety, carrier_offsetz+self._APPROACH, 0, 0, 0]
 
-        robot = self.RDK.Item('Fanuc', robolink.robolink.ITEM_TYPE_ROBOT)
+        robot = self.RDK.Item('Fanuc', ITEM_TYPE_ROBOT)
         self.grab(robot)
         if not robot.item.Valid():
             self.grab(robot)
@@ -80,12 +88,19 @@ class Cover:
         robot.MoveL(position_withoffset)
         cover = self.RDK.Item(f'cover_{self.color}_{self.curve}')
         cover.AttachClosest('bottom')
-
-        from config import CaseConfig
-
         engrave_check = CaseConfig.engrave()
+
         if engrave_check:
-            robot.setPoseFrame('engrave_base')
+            engrave_plate_pos_app = [0, 0, 0+self._APPROACH, 0, 0, 0]
+            robot.setPoseFrame('cart_robot')
+            robot.MoveJ(engrave_plate_pos_app)
+            engrave_plate_pos = engrave_plate_pos_app
+            engrave_plate_pos[2] = engrave_plate_pos[2]-self._APPROACH
+            robot.setSpeed(50)
+            robot.MoveL(engrave_plate_pos)
+            robot_home = robot.setJointsHome(self._ROBOT_HOME)
+            robot.MoveJ(robot_home)
+
 
             # Move cover to engrave_base
             # Detach phone from robot and attach to engrave_base
