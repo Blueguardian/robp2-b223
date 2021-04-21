@@ -1,8 +1,16 @@
+# The following file contains code made by ROB2 - B223
+# 2. Semester AAU 2021.
+# The following file has no copyright and can be used freely
+# Credit is expected when used commercially
+
+# Necessary imports for the class Stock
 import json
 import os
 
-class Stock:
+# Begin Class definition
 
+
+class Stock:
     STOCK_FILE = 'stock.json'
     FIELDS = ['type', 'stock']
     INITIAL_STOCK = 10
@@ -16,7 +24,7 @@ class Stock:
         stock = {type_: self.INITIAL_STOCK for type_ in self.TYPES}
 
         with open(self.STOCK_FILE, 'w') as f:
-            f.write(json.dumps(stock,indent=4))
+            f.write(json.dumps(stock, indent=4))
 
     def __get_stock(self):
         with open(self.STOCK_FILE, 'r') as f:
