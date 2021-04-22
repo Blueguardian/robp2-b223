@@ -12,14 +12,14 @@ class Cover:
     _OFFSETX_COVER_DIST = 70  # Offset in x-direction in mm (container offset between holes)
     _OFFSETY_COVER_DIST = 73  # Offset in y-direction in mm (container width / 2)
     _OFFSETZ_COVER_FLAT_DIST = 11.7  # Offset in z-direction in mm (Base cover depth)
-    _OFFSETZ_COVER_EDGE_DIST = 14.7
-    _OFFSETZ_COVER_CURVE_DIST = 16.7
-    _BOTTOM_COVER_HEIGHT = 13
-    _TOP_COVER_INDENT_OFFSET = 5
-    _COVER_CAPACITY = 10  # Cover capacity for calculations
+    _OFFSETZ_COVER_EDGE_DIST = 14.7  # Offset in z-direction in mm (Curved edges cover depth)
+    _OFFSETZ_COVER_CURVE_DIST = 16.7  # Offset in z-direction in mm (Curved cover depth)
+    _BOTTOM_COVER_HEIGHT = 13  # Offset in z-direction in mm (bottom cover depth)
+    _TOP_COVER_INDENT_OFFSET = 5  # Offset for top cover (the part that ends inside the bottom cover
+    _COVER_CAPACITY = Stock.get_init()  # Cover capacity for calculations
     _APPROACH_FLAT = 100 # Approach to objects in mm
-    _APPROACH_EDGE = _APPROACH_FLAT + 3*10
-    _APPROACH_CURVE = _APPROACH_FLAT + 5*10
+    _APPROACH_EDGE = _APPROACH_FLAT + 3*10  # Approach for curved edges cover in mm
+    _APPROACH_CURVE = _APPROACH_FLAT + 5*10  # Approach for curved cover in mm
     _ROBOT_HOME = [0, 0, 0, 90, 0, 0,]  # Robot home position (Joint)
     RDK = Robolink() # Establish contact to RoboDK
 
