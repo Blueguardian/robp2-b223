@@ -14,7 +14,7 @@ class Cover:
     _OFFSETY_COVER_DIST = 73
     _OFFSETZ_COVER_FLAT_DIST = 11.7
     _OFFSETZ_COVER_EDGE_DIST = 14.7
-    _OFFSETZ_COVER_CURVE_DIST = 16.7
+    _OFFSETZ_COVER_CURVED_DIST = 16.7
     _BOTTOM_COVER_HEIGHT = 13
     _TOP_COVER_INDENT_OFFSET = 5
     _COVER_CAPACITY = Stock.get_init()
@@ -70,7 +70,7 @@ class Cover:
                 f'{self.color}_{self.curve}') * self._OFFSETZ_COVER_EDGE_DIST
         if identifier in range(6, 9):
             self.position[2] = self.position[2] - stock.get(
-                f'{self.color}_{self.curve}') * self._OFFSETZ_COVER_CURVE_DIST
+                f'{self.color}_{self.curve}') * self._OFFSETZ_COVER_CURVED_DIST
 
     def __str__(self):
         """
@@ -139,7 +139,7 @@ class Cover:
         if self.curve == 'edge':
             position_withoffset[2] = position_withoffset[2] - self._APPROACH_EDGE + self._OFFSETZ_COVER_EDGE_DIST
         if self.curve == 'curved':
-            position_withoffset[2] = position_withoffset[2] - self._APPROACH_CURVE + self._OFFSETZ_COVER_CURVE_DIST
+            position_withoffset[2] = position_withoffset[2] - self._APPROACH_CURVE + self._OFFSETZ_COVER_CURVED_DIST
 
         # Take into account that it is now a whole phone
         position_withoffset[2] = position_withoffset[2] - self._TOP_COVER_INDENT_OFFSET + self._BOTTOM_COVER_HEIGHT
@@ -174,7 +174,7 @@ class Cover:
             elif self.curve == 'edge':
                 engrave_plate_pos[2] = engrave_plate_pos[2] + self._OFFSETZ_COVER_EDGE_DIST - self._APPROACH_EDGE
             else:
-                engrave_plate_pos[2] = engrave_plate_pos[2] + self._OFFSETZ_COVER_CURVE_DIST - self._APPROACH_CURVE
+                engrave_plate_pos[2] = engrave_plate_pos[2] + self._OFFSETZ_COVER_CURVED_DIST - self._APPROACH_CURVE
             engrave_plate_pos[2] = engrave_plate_pos[2] + self._BOTTOM_COVER_HEIGHT - self._TOP_COVER_INDENT_OFFSET
 
             robot.setSpeed(50)
@@ -189,4 +189,49 @@ class Cover:
         """
         Retrieves the cover from the engraving plate and places it on the pallette
         """
-        # To be continued
+        _OFFSET_PLATE = 50
+        _CURVED_PHONE_HEIGHT = self._OFFSETZ_COVER_CURVED_DIST + self._BOTTOM_COVER_HEIGHT - self._TOP_COVER_INDENT_OFFSET
+        _EDGE_PHONE_HEIGHT = self._OFFSETZ_COVER_EDGE_DIST + self._BOTTOM_COVER_HEIGHT - self._TOP_COVER_INDENT_OFFSET
+        _FLAT_PHONE_HEIGHT = self._OFFSETZ_COVER_FLAT_DIST + self._BOTTOM_COVER_HEIGHT - self._TOP_COVER_INDENT_OFFSET
+
+        carrier_offsetx = 90  # (Carrier length / 2)
+        carrier_offsety = 55  # (Carrier width / 2)
+        carrier_offsetz = 41.5  # (Carrier depth)
+
+        carrier_position_app = [carrier_offsetx, carrier_offsety, carrier_offsetz + self._APPROACH_FLAT, 0, 0, 0]
+
+        robot = self.RDK.Item('fanuc')
+        robot.setPoseFrame('engraving_plate')
+        engraving_plate_app = [0, 0, self._APPROACH_FLAT, 0, 0, 0]
+        robot.MoveJ(engraving_plate_app)
+        robot.setSpeed(50)
+        engraving_plate_pos = engraving_plate_app
+        if self.curve == 'none':
+            engraving_plate_pos[2] = engraving_plate_pos[2] - self._APPROACH_FLAT + _FLAT_PHONE_HEIGHT
+        if self.curve == 'edge':
+            engraving_plate_pos[2] = engraving_plate_pos[2] - self._APPROACH_FLAT + _EDGE_PHONE_HEIGHT
+        if self.curve == 'curved':
+            engraving_plate_pos[2] = engraving_plate_pos[2] - self._APPROACH_FLAT + _CURVED_PHONE_HEIGHT
+        robot.MoveL(engraving_plate_pos)
+        engraving_plate = self.RDK.Item('cart_robot')
+        engraving_plate.DetachAll()
+        robot.AttachClosest(f'cover_{self.color}_{self.curve}')
+        robot.MoveL(engraving_plate_app)
+        robot.setSpeed()
+        robot.setPoseFrame('carrier')
+        robot.MoveJ(carrier_position_app)
+        carrier_position = carrier_position_app
+        if self.curve == 'none':
+            carrier_position[2] = carrier_position[2] - self._APPROACH_FLAT + _FLAT_PHONE_HEIGHT
+        if self.curve == 'edge':
+            carrier_position[2] = carrier_position[2] - self._APPROACH_FLAT + _EDGE_PHONE_HEIGHT
+        if self.curve == 'curved':
+            carrier_position[2] = carrier_position[2] - self._APPROACH_FLAT + _CURVED_PHONE_HEIGHT
+
+        robot.setSpeed(50)
+        robot.MoveL(carrier_position)
+        robot.DetachAll()
+        robot.MoveL(carrier_position_app)
+        robot.JointsHome()
+
+
