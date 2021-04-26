@@ -22,3 +22,6 @@ if RDK.Item(f'cover_{CaseConfig.colour()}_{CaseConfig.curve_style()}').item.__bo
             pattern.begin_edge()
         if CaseConfig.curve_style() == 'curved':
             pattern.begin_curved()
+        cover.retrieve()
+    stock.update(f'{CaseConfig.colour()}_{CaseConfig.curve_style()}',
+                 stock.get(f'{CaseConfig.colour()}_{CaseConfig.curve_style()}') - 1)
