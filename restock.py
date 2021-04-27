@@ -2,7 +2,6 @@
 # 2. Semester AAU 2021.
 
 from robolink.robolink import Robolink
-
 from stock import Stock
 
 """
@@ -48,24 +47,16 @@ case_types = {
     'blue_curved': 8
 }
 
-color_type = {
-    'blue': [0, 0, 1],
-    'black': [1, 1, 1],
-    'white': [0, 0, 0]
-}
-
 # For each type check the stock
 for type_cover in TYPES:
     if stock.get(type_cover) is 0:
         # Restock
         for i in range(_INIT_STOCK):
-            curvature = type_cover.split('_')[-1]
-            cover = RDK.AddFile(f'covers/cover_{curvature}')
+            cover = RDK.AddFile(f'covers/cover_{type_cover}')
             cover.setName(f'cover_{type_cover}_{stock.get(type_cover) + 1}')
             cover.setPoseFrame('stock_container')
             height_offset = container_height_map[type_cover.split('_')[-1]]
-            cover_height = dist_map[curvature] * stock.get(type_cover)
+            cover_height = dist_map[type_cover.split('_')[-1]] * stock.get(type_cover)
             cover.MoveL([_OFFSETX_COVER_DIST * case_types[type_cover], _OFFSETY_COVER_DIST,
                          height_offset + cover_height, 0, 0, 0])
-            cover.setColor(color_type[type_cover.split('_')[0]])
             stock.add(type_cover, 1)

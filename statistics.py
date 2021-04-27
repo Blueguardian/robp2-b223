@@ -1,10 +1,9 @@
 # The following file contains code made by ROB2 - B223
 # 2. Semester AAU 2021.
 
+from robolink.robolink import Robolink
 import json
 import os
-
-from robolink.robolink import Robolink
 
 
 class Statistics:
