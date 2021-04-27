@@ -3,6 +3,7 @@ from robolink.robolink import Robolink
 from svgpy import svg
 from config import CaseConfig
 from stock import Stock
+from statistics import Statistics
 
 import os
 
@@ -12,8 +13,9 @@ class Engrave:
     IMAGE_SIZE_NONE = svg.Point(112, 58)  # size of the image in MM not including edge (2mm)
     IMAGE_SIZE_EDGE = svg.Point(104, 40)  # size of image in MM not including edge (??? mm)
     IMAGE_SIZE_CURVED = svg.Point(107, 58)  # size of image in MM not including edge (??? mm)
-    stock = Stock()
     RDK = Robolink()
+    stock = Stock()
+    stat = Statistics()
 
     def __init__(self):
         """
@@ -50,7 +52,7 @@ class Engrave:
         tool_frame = self.RDK.Item('tool')
         pix_ref = self.RDK.Item('pixel')
         self.move_to_environment()
-        stock_str = f'{self.color}_{self.curve}'
+        stock_str = self.color + '_' + self.curve
         item = self.RDK.Item(f'cover_{self.color}_none_{self.stock.get(stock_str)}')
 
         # Set the necessary frame for controlling the engraving mechanism
@@ -92,6 +94,8 @@ class Engrave:
 
             robot.MoveL(home_trans)
             self.move_from_environment()
+            stat_str = self.color + '_' + self.curve + '_engraved'
+            self.stat.add(stat_str, 1)
 
     def begin_edge(self):
         """
@@ -147,6 +151,8 @@ class Engrave:
 
             robot.MoveL(home_trans)
             self.move_from_environment()
+            stat_str = self.color + '_' + self.curve + '_engraved'
+            self.stat.add(stat_str, 1)
 
     def begin_curved(self):
         """
@@ -202,6 +208,8 @@ class Engrave:
 
             robot.MoveL(home_trans)
             self.move_from_environment()
+            stat_str = self.color + '_' + self.curve + '_engraved'
+            self.stat.add(stat_str, 1)
 
     def move_to_environment(self):
         """

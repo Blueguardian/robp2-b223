@@ -5,6 +5,7 @@
 from robolink.robolink import Robolink, ITEM_TYPE_ROBOT
 from config import CaseConfig
 from stock import Stock
+from statistics import Statistics
 
 
 class Cover:
@@ -35,6 +36,7 @@ class Cover:
         self.color = color
         self.curve = curve_type
         self.stock = stock
+        self.stat = Statistics()
         self.position = [73, self._OFFSETY_COVER_DIST, 175, 0, 0, 0]
         self.correct_pos(self.stock)
 
@@ -46,6 +48,7 @@ class Cover:
         :param stock: Stock controlling object with type hint Stock
         :return: The position of the specific cover
         """
+
         case_types = {
             'black_none': 0,
             'black_edge': 1,
@@ -102,6 +105,7 @@ class Cover:
         robot.AttachClosest(f'cover_{self.color}_{self.curve}')
         robot.MoveL(position_copy)
         robot.setSpeed()
+        self.stock.sub(f'{self.color}_{self.curve}', 1)
 
     def give_top(self):
         """
@@ -233,5 +237,5 @@ class Cover:
         robot.DetachAll()
         robot.MoveL(carrier_position_app)
         robot.JointsHome()
-
+        self.stat.add(f'{self.color}_{self.curve}', 1)
 
