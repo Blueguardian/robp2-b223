@@ -56,7 +56,7 @@ class Stock:
         stock_ = self.__get_stock()
         return stock_[type_]
 
-    def update(self, type_: str, count: int):
+    def set(self, type_: str, count: int):
         """
         Updates the stock of a given type with a given count
         :param type_: Type of cover
@@ -64,6 +64,26 @@ class Stock:
         """
         stock_ = self.__get_stock()
         stock_[type_] = count
+        self.__update_stock(stock_)
+
+    def add(self, type_: str, count: int):
+        """
+        Updates the stock of a given type with a given count
+        :param type_: Type of cover
+        :param count: The amount that is left
+        """
+        stock_ = self.__get_stock()
+        stock_[type_] += count
+        self.__update_stock(stock_)
+
+    def sub(self, type_: str, count: int):
+        """
+        Updates the stock of a given type with a given count
+        :param type_: Type of cover
+        :param count: The amount that is left
+        """
+        stock_ = self.__get_stock()
+        stock_[type_] -= count
         self.__update_stock(stock_)
 
     @classmethod

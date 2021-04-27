@@ -2,10 +2,11 @@
 # 2. Semester AAU 2021.
 
 from robolink.robolink import Robolink
+
 from config import CaseConfig
-from stock import Stock
 from cover import Cover
 from engrave import Engrave
+from stock import Stock
 
 RDK = Robolink()
 stock = Stock()  # For simulating stock
@@ -23,5 +24,3 @@ if RDK.Item(f'cover_{CaseConfig.colour()}_{CaseConfig.curve_style()}').item.__bo
         if CaseConfig.curve_style() == 'curved':
             pattern.begin_curved()
         cover.retrieve()
-    stock.update(f'{CaseConfig.colour()}_{CaseConfig.curve_style()}',
-                 stock.get(f'{CaseConfig.colour()}_{CaseConfig.curve_style()}') - 1)
