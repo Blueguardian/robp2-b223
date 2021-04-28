@@ -7,6 +7,7 @@ from robolink.robolink import Robolink, ITEM_TYPE_ROBOT
 from config import CaseConfig
 from statistics import Statistics
 from stock import Stock
+from statistics import Statistics
 
 
 class Cover:
