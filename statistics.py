@@ -18,24 +18,29 @@ class Statistics:
 
     def __init__(self):
         """
-
+        Constructor:
+        Checks if file exits, if not then creates it.
         """
         if not os.path.isfile(self.STATISTICS_FILE):
             self.__create_statistics()
 
     def __str__(self):
         """
-
-        :return:
+        String method:
+        Prints a string containing relevant information about the object itself
         """
         RDK = Robolink()
         statistics_ = self.__get_statistics()
-        RDK.RunMessage(statistics_)
+        statistics_ = str(statistics_)
+        statistics_ = str(statistics_).replace(', ', '\n').replace('{', '').replace('}', '').replace('\'', '').replace(
+            'curved', 'curved covers').replace('_', ' ').replace('none', 'flat covers').replace(
+            'edge', 'curved edges covers').replace('covers:', 'covers produced:')
+        statistics_ = str('Current production statistics:\n' + statistics_)
+        RDK.ShowMessage(statistics_)
 
     def __create_statistics(self):
         """
-
-        :return:
+        Creates a json file and prints the initial values into it
         """
         statistics = {type_: self.INITIAL_VALUE for type_ in self.TYPES}
 
@@ -44,23 +49,23 @@ class Statistics:
 
     def __get_statistics(self):
         """
-
-        :return:
+        Opens and reads the current stock from the statistics file
+        :return: Returns the contents of the statistics file
         """
         with open(self.STATISTICS_FILE, 'r') as f:
             return json.loads(f.read())
 
-    def __update_statistics(self, stock: json):
+    def __update_statistics(self, stat: json):
         """
-
-        :param stock:
+        Prints the given statistics to the file
+        :param stat: object with type hint json
         """
         with open(self.STATISTICS_FILE, 'w') as f:
-            f.write(json.dumps(stock, indent=4))
+            f.write(json.dumps(stat, indent=4))
 
     def get(self, stat_: str):
         """
-
+        Accesses the file and reads the current statistics of a specific type
         :param stat_: the type to get the value from
         :return: The value contained in the type "stat_"
         """
@@ -69,7 +74,7 @@ class Statistics:
 
     def add(self, stat_: str, count: int):
         """
-
+        Updates the statistics with the given count
         :param stat_: the type that has to be added to
         :param count: The amount to be added
         """
