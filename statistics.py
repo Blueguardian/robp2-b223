@@ -1,7 +1,6 @@
 # The following file contains code made by ROB2 - B223
 # 2. Semester AAU 2021.
 
-from robolink.robolink import Robolink
 import json
 import os
 
@@ -16,27 +15,28 @@ class Statistics:
              'white_curved', 'white_curved_engraved', 'blue_none', 'blue_none_engraved', 'blue_edge',
              'blue_edge_engraved', 'blue_curved', 'blue_curved_engraved']
 
-    def __init__(self):
+    def __init__(self, rdk):
         """
         Constructor:
         Checks if file exits, if not then creates it.
         """
         if not os.path.isfile(self.STATISTICS_FILE):
             self.__create_statistics()
+            self.RDK = rdk
 
     def __str__(self):
         """
         String method:
         Prints a string containing relevant information about the object itself
         """
-        RDK = Robolink()
+
         statistics_ = self.__get_statistics()
         statistics_ = str(statistics_)
         statistics_ = str(statistics_).replace(', ', '\n').replace('{', '').replace('}', '').replace('\'', '').replace(
             'curved', 'curved covers').replace('_', ' ').replace('none', 'flat covers').replace(
             'edge', 'curved edges covers').replace('covers:', 'covers produced:')
         statistics_ = str('Current production statistics:\n' + statistics_)
-        RDK.ShowMessage(statistics_)
+        self.RDK.ShowMessage(statistics_)
 
     def __create_statistics(self):
         """

@@ -13,10 +13,10 @@ stock = Stock()  # For simulating stock
 cover = Cover(CaseConfig.colour(), CaseConfig.curve_style(), stock)
 
 # If the item 'cover color curve_style exists continue  # Uncertain if this works
-if RDK.Item(f'cover_{CaseConfig.colour()}_{CaseConfig.curve_style()}').item.__bool__():
+if RDK.Item(f'cover_{CaseConfig.colour()}_{CaseConfig.curve_style()}'):
     cover.give_top()
     if CaseConfig.engrave():
-        pattern = Engrave()
+        pattern = Engrave(RDK)
         if CaseConfig.curve_style() == 'none':
             pattern.begin_flat()
         if CaseConfig.curve_style() == 'edge':

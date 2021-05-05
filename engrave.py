@@ -1,5 +1,4 @@
 from robodk import robodk
-from robolink.robolink import Robolink
 from svgpy import svg
 from config import CaseConfig
 from stock import Stock
@@ -13,11 +12,9 @@ class Engrave:
     IMAGE_SIZE_NONE = svg.Point(112, 58)  # size of the image in MM not including edge (2mm)
     IMAGE_SIZE_EDGE = svg.Point(104, 40)  # size of image in MM not including edge (??? mm)
     IMAGE_SIZE_CURVED = svg.Point(107, 58)  # size of image in MM not including edge (??? mm)
-    RDK = Robolink()
     stock = Stock()
-    stat = Statistics()
 
-    def __init__(self):
+    def __init__(self, rdk):
         """
         Constructor
         Checks whether an .svg file exist at the given location, if not loads a default .svg file
@@ -29,6 +26,8 @@ class Engrave:
             self.svg = svg.svg_load(CaseConfig.file('DEFAULT'))
         self.curve = CaseConfig.curve_style()
         self.color = CaseConfig.colour()
+        self.RDK = rdk
+        self.stat = Statistics(rdk)
 
     @staticmethod
     def point2d_2_pose(point, tangent):

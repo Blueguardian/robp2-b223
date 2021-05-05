@@ -2,10 +2,11 @@
 # 2. Semester AAU 2021.
 
 # Imports for class
-from robolink.robolink import Robolink, ITEM_TYPE_ROBOT
-
+import robolink.robolink
+from robodk import *
+from robolink import *
+from robolink.robolink import Robolink
 from config import CaseConfig
-from statistics import Statistics
 from stock import Stock
 from statistics import Statistics
 
@@ -25,7 +26,7 @@ class Cover:
     _APPROACH_EDGE = _APPROACH_FLAT + 30
     _APPROACH_CURVE = _APPROACH_FLAT + 50
     _ROBOT_HOME = [0, 0, 0, 90, 0, 0, ]
-    RDK = Robolink()
+
 
     def __init__(self, color, curve_type, stock: Stock):
         """
@@ -35,12 +36,15 @@ class Cover:
         :param curve_type: The curve type given in the config file
         :param stock: Stock Stock controlling object with type hint Stock
         """
+        self.RDK = Robolink()
+        self.color = color
         self.color = color
         self.curve = curve_type
         self.stock = stock
-        self.stat = Statistics()
-        self.position = [73, self._OFFSETY_COVER_DIST, 175, 0, 0, 0]
+        self.stat = Statistics(self.RDK)
+        self.position = Pose(45.5, self._OFFSETY_COVER_DIST, 175, -180, 0, 0)
         self.correct_pos(self.stock)
+        self.stat = Statistics(self.RDK)
 
     # Define dictionary with the different types and give them an identifier
     def correct_pos(self, stock: Stock):
@@ -64,17 +68,17 @@ class Cover:
         }
 
         identifier = case_types[f'{self.color}_{self.curve}']
-        self.position[0] = self.position[0] + identifier * self._OFFSETX_COVER_DIST
+        self.position[0, 3] = self.position[0, 3] + identifier * self._OFFSETX_COVER_DIST
 
         # Depending on the remaining stock and type of curve, calculate the Z-offset to compensate for the empty space
         if identifier in range(3):
-            self.position[2] = self.position[2] - stock.get(
+            self.position[2, 3] = self.position[2, 3] + stock.get(
                 f'{self.color}_{self.curve}') * self._OFFSETZ_COVER_FLAT_DIST
         if identifier in range(4, 6):
-            self.position[2] = self.position[2] - stock.get(
+            self.position[2, 3] = self.position[2, 3] + stock.get(
                 f'{self.color}_{self.curve}') * self._OFFSETZ_COVER_EDGE_DIST
         if identifier in range(6, 9):
-            self.position[2] = self.position[2] - stock.get(
+            self.position[2, 3] = self.position[2, 3] + stock.get(
                 f'{self.color}_{self.curve}') * self._OFFSETZ_COVER_CURVED_DIST
 
     def __str__(self):
@@ -96,15 +100,20 @@ class Cover:
         Method that sends instructions to the robot in RoboDK to grab the cover from the stock container
         :param robot: Robot object representing the robot in RoboDK
         """
-        robot.setPoseFrame('stock_container')
-        robot.setPoseTool('suction')
+        frame = self.RDK.Item('stock_container', 5)
+        robot.setPoseFrame(frame.Pose())
+        self.RDK.RunProgram('Prog1', True)
 
         position_copy = self.position
-        position_copy[2] = position_copy[2] + self._APPROACH_FLAT
+        position_copy[2, 3] = position_copy[2, 3] + self._APPROACH_FLAT
         robot.MoveJ(position_copy)
         robot.setSpeed(50)
         robot.MoveL(self.position)
-        robot.AttachClosest(f'cover_{self.color}_{self.curve}')
+        cover_color = str(f'{self.color}_{self.curve}')
+        cover_type_color = str(f'cover_{self.color}_{self.curve}_{self.stock.get(cover_color)}')
+        self_cover = self.RDK.Item(cover_type_color, 5)
+        self.RDK.RunProgram('Prog6')
+        # robot.AttachClosest(self_cover)
         robot.MoveL(position_copy)
         robot.setSpeed()
         self.stock.sub(f'{self.color}_{self.curve}', 1)
@@ -118,22 +127,23 @@ class Cover:
         carrier_offsety = 55  # (Carrier width / 2)
         carrier_offsetz = 41.5  # (Carrier depth)
 
-        carrier_position_app = [carrier_offsetx, carrier_offsety, carrier_offsetz, 0, 0, 0]
+        carrier_position_app = Pose(carrier_offsetx, carrier_offsety, carrier_offsetz, 0, 0, 0)
 
         if self.curve == 'none':
-            carrier_position_app[2] = carrier_position_app[2] + self._APPROACH_FLAT
+            carrier_position_app[2, 3] = carrier_position_app[2, 3] + self._APPROACH_FLAT
         if self.curve == 'edge':
-            carrier_position_app[2] = carrier_position_app[2] + self._APPROACH_EDGE
+            carrier_position_app[2, 3] = carrier_position_app[2, 3] + self._APPROACH_EDGE
         if self.curve == 'curved':
-            carrier_position_app[2] = carrier_position_app[2] + self._APPROACH_CURVE
+            carrier_position_app[2, 3] = carrier_position_app[2, 3] + self._APPROACH_CURVE
 
-        robot = self.RDK.Item('fanuc', ITEM_TYPE_ROBOT)
+        self.RDK.Connect()
+        robot = self.RDK.Item('fanuc', 2)
         self.grab(robot)
         if not robot.item.Valid():
             self.grab(robot)
 
         robot.setPoseFrame('carrier')
-        robot.setPoseTool('suction')
+        robot.setPoseTool('tool_suction')
         robot.MoveJ(carrier_position_app)
 
         position_withoffset = carrier_position_app
@@ -141,14 +151,16 @@ class Cover:
         # Check the type of cover again and subtract the approach offset,
         # while considering that a cover is attached to the tool
         if self.curve == 'none':
-            position_withoffset[2] = position_withoffset[2] - self._APPROACH_FLAT + self._OFFSETZ_COVER_FLAT_DIST
+            position_withoffset[2, 3] = position_withoffset[2, 3] - self._APPROACH_FLAT + self._OFFSETZ_COVER_FLAT_DIST
         if self.curve == 'edge':
-            position_withoffset[2] = position_withoffset[2] - self._APPROACH_EDGE + self._OFFSETZ_COVER_EDGE_DIST
+            position_withoffset[2, 3] = position_withoffset[2, 3] - self._APPROACH_EDGE + self._OFFSETZ_COVER_EDGE_DIST
         if self.curve == 'curved':
-            position_withoffset[2] = position_withoffset[2] - self._APPROACH_CURVE + self._OFFSETZ_COVER_CURVED_DIST
+            position_withoffset[2, 3] = position_withoffset[
+                                            2, 3] - self._APPROACH_CURVE + self._OFFSETZ_COVER_CURVED_DIST
 
         # Take into account that it is now a whole phone
-        position_withoffset[2] = position_withoffset[2] - self._TOP_COVER_INDENT_OFFSET + self._BOTTOM_COVER_HEIGHT
+        position_withoffset[2, 3] = position_withoffset[
+                                        2, 3] - self._TOP_COVER_INDENT_OFFSET + self._BOTTOM_COVER_HEIGHT
 
         robot.setSpeed(50)
         robot.MoveL(position_withoffset)
@@ -160,33 +172,35 @@ class Cover:
         engrave_check = CaseConfig.engrave()
 
         if engrave_check:
-            engrave_plate_pos_app = [0, 0, 0, 0, 0, 0]
+            engrave_plate_pos_app = Pose(0, 0, 0, 0, 0, 0)
 
             # Check for type of cover an apply an approach to the z value
             if self.curve == 'none':
-                engrave_plate_pos_app[2] = engrave_plate_pos_app[2] + self._APPROACH_FLAT
+                engrave_plate_pos_app[2, 3] = engrave_plate_pos_app[2, 3] + self._APPROACH_FLAT
             elif self.curve == 'edge':
-                engrave_plate_pos_app[2] = engrave_plate_pos_app[2] + self._APPROACH_EDGE
+                engrave_plate_pos_app[2, 3] = engrave_plate_pos_app[2, 3] + self._APPROACH_EDGE
             else:
-                engrave_plate_pos_app[2] = engrave_plate_pos_app[2] + self._APPROACH_CURVE
+                engrave_plate_pos_app[2, 3] = engrave_plate_pos_app[2, 3] + self._APPROACH_CURVE
 
-            robot.setPoseFrame('cart_robot')
+            robot.setPoseFrame('engraving_plate')
             robot.MoveJ(engrave_plate_pos_app)
             engrave_plate_pos = engrave_plate_pos_app
 
             # Check for cover type and subtract the approach while taking into account carrying a phone
             if self.curve == 'none':
-                engrave_plate_pos[2] = engrave_plate_pos[2] + self._OFFSETZ_COVER_FLAT_DIST - self._APPROACH_FLAT
+                engrave_plate_pos[2, 3] = engrave_plate_pos[2, 3] + self._OFFSETZ_COVER_FLAT_DIST - self._APPROACH_FLAT
             elif self.curve == 'edge':
-                engrave_plate_pos[2] = engrave_plate_pos[2] + self._OFFSETZ_COVER_EDGE_DIST - self._APPROACH_EDGE
+                engrave_plate_pos[2, 3] = engrave_plate_pos[2, 3] + self._OFFSETZ_COVER_EDGE_DIST - self._APPROACH_EDGE
             else:
-                engrave_plate_pos[2] = engrave_plate_pos[2] + self._OFFSETZ_COVER_CURVED_DIST - self._APPROACH_CURVE
-            engrave_plate_pos[2] = engrave_plate_pos[2] + self._BOTTOM_COVER_HEIGHT - self._TOP_COVER_INDENT_OFFSET
+                engrave_plate_pos[2, 3] = engrave_plate_pos[
+                                              2, 3] + self._OFFSETZ_COVER_CURVED_DIST - self._APPROACH_CURVE
+            engrave_plate_pos[2, 3] = engrave_plate_pos[
+                                          2, 3] + self._BOTTOM_COVER_HEIGHT - self._TOP_COVER_INDENT_OFFSET
 
             robot.setSpeed(50)
             robot.MoveL(engrave_plate_pos)
             robot.DetachAll()  # Detach all objects from the robot
-            cart_robot = self.RDK.Item('cart_robot')
+            cart_robot = self.RDK.Item('engraving_plate')
             cart_robot.AttachClosest(f'cover_{self.color}_{self.curve}')
             robot_home = robot.setJointsHome(self._ROBOT_HOME)
             robot.MoveJ(robot_home)
@@ -204,20 +218,21 @@ class Cover:
         carrier_offsety = 55  # (Carrier width / 2)
         carrier_offsetz = 41.5  # (Carrier depth)
 
-        carrier_position_app = [carrier_offsetx, carrier_offsety, carrier_offsetz + self._APPROACH_FLAT, 0, 0, 0]
+        carrier_position_app = Pose(
+            carrier_offsetx, carrier_offsety, carrier_offsetz + self._APPROACH_FLAT, 0, 0, 0)
 
-        robot = self.RDK.Item('fanuc')
+        robot = self.RDK.Item('fanuc', ITEM_)
         robot.setPoseFrame('engraving_plate')
-        engraving_plate_app = [0, 0, self._APPROACH_FLAT, 0, 0, 0]
+        engraving_plate_app = Pose(0, 0, self._APPROACH_FLAT, 0, 0, 0)
         robot.MoveJ(engraving_plate_app)
         robot.setSpeed(50)
         engraving_plate_pos = engraving_plate_app
         if self.curve == 'none':
-            engraving_plate_pos[2] = engraving_plate_pos[2] - self._APPROACH_FLAT + _FLAT_PHONE_HEIGHT
+            engraving_plate_pos[2, 3] = engraving_plate_pos[2, 3] - self._APPROACH_FLAT + _FLAT_PHONE_HEIGHT
         if self.curve == 'edge':
-            engraving_plate_pos[2] = engraving_plate_pos[2] - self._APPROACH_FLAT + _EDGE_PHONE_HEIGHT
+            engraving_plate_pos[2, 3] = engraving_plate_pos[2, 3] - self._APPROACH_FLAT + _EDGE_PHONE_HEIGHT
         if self.curve == 'curved':
-            engraving_plate_pos[2] = engraving_plate_pos[2] - self._APPROACH_FLAT + _CURVED_PHONE_HEIGHT
+            engraving_plate_pos[2, 3] = engraving_plate_pos[2, 3] - self._APPROACH_FLAT + _CURVED_PHONE_HEIGHT
         robot.MoveL(engraving_plate_pos)
         engraving_plate = self.RDK.Item('cart_robot')
         engraving_plate.DetachAll()
@@ -228,11 +243,11 @@ class Cover:
         robot.MoveJ(carrier_position_app)
         carrier_position = carrier_position_app
         if self.curve == 'none':
-            carrier_position[2] = carrier_position[2] - self._APPROACH_FLAT + _FLAT_PHONE_HEIGHT
+            carrier_position[2, 3] = carrier_position[2, 3] - self._APPROACH_FLAT + _FLAT_PHONE_HEIGHT
         if self.curve == 'edge':
-            carrier_position[2] = carrier_position[2] - self._APPROACH_FLAT + _EDGE_PHONE_HEIGHT
+            carrier_position[2, 3] = carrier_position[2, 3] - self._APPROACH_FLAT + _EDGE_PHONE_HEIGHT
         if self.curve == 'curved':
-            carrier_position[2] = carrier_position[2] - self._APPROACH_FLAT + _CURVED_PHONE_HEIGHT
+            carrier_position[2, 3] = carrier_position[2, 3] - self._APPROACH_FLAT + _CURVED_PHONE_HEIGHT
 
         robot.setSpeed(50)
         robot.MoveL(carrier_position)
@@ -240,4 +255,3 @@ class Cover:
         robot.MoveL(carrier_position_app)
         robot.JointsHome()
         self.stat.add(f'{self.color}_{self.curve}', 1)
-
