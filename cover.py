@@ -42,10 +42,10 @@ class Cover:
         self.color = color
         self.curve = curve_type
         self.stock = stock
-        self.stat = Statistics(self.RDK)
+        self.stat = Statistics()
         self.position = Pose(45.5, self._OFFSETY_COVER_DIST, 0, -180, 0, 0)
         self.correct_pos(self.stock)
-        self.stat = Statistics(self.RDK)
+
 
     # Define dictionary with the different types and give them an identifier
     def correct_pos(self, stock: Stock):
@@ -242,6 +242,13 @@ class Cover:
             robot.MoveL(engrave_plate_pos)
             tool_suction_ = self.RDK.Item('tool_suction', 4)
             tool_suction_.DetachAll()  # Detach all objects from the robot
+            if self.curve == 'none':
+                engrave_plate_pos[2, 3] = engrave_plate_pos[2, 3] + self._APPROACH
+            elif self.curve == 'edge':
+                engrave_plate_pos[2, 3] = engrave_plate_pos[2, 3] + self._APPROACH - 2
+            else:
+                engrave_plate_pos[2, 3] = engrave_plate_pos[2, 3] + self._APPROACH - 2.5
+            robot.MoveL(engrave_plate_pos)
             robot.MoveJ(robot.JointsHome())
             self.RDK.RunProgram('Prog8')
 
@@ -330,3 +337,23 @@ class Cover:
         tool_suction_ = self.RDK.Item('tool_suction', 4)
         tool_suction_.DetachAll()  # Detach all objects from the robot
         robot.MoveJ(robot.JointsHome())
+
+    def new_cover_check(self):
+        cover_types = {
+            0: 'black_none',
+            1: 'black_edge',
+            2: 'black_curved',
+            3: 'white_none',
+            4: 'white_edge',
+            5: 'white_curved',
+            6: 'blue_none',
+            7: 'blue_edge',
+            8: 'blue_curved'
+        }
+
+        for key in cover_types:
+            stock_int = self.stock.get(f'{cover_types[key]}')
+            stock_int = stock_int + 1
+            item = self.RDK.Item(f'cover_{cover_types[key]}_{stock_int}')
+            if item.Valid():
+                item.Delete()

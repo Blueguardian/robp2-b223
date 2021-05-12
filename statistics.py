@@ -3,6 +3,7 @@
 
 import json
 import os
+from robolink import *
 
 
 class Statistics:
@@ -14,15 +15,15 @@ class Statistics:
              'black_curved_engraved', 'white_none', 'white_none_engraved', 'white_edge', 'white_edge_engraved',
              'white_curved', 'white_curved_engraved', 'blue_none', 'blue_none_engraved', 'blue_edge',
              'blue_edge_engraved', 'blue_curved', 'blue_curved_engraved']
+    RDK = Robolink()
 
-    def __init__(self, rdk):
+    def __init__(self):
         """
         Constructor:
         Checks if file exits, if not then creates it.
         """
         if not os.path.isfile(self.STATISTICS_FILE):
             self.__create_statistics()
-            self.RDK = rdk
 
     def __str__(self):
         """

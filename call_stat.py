@@ -2,6 +2,8 @@
 # 2. Semester AAU 2021.
 
 from statistics import Statistics
+from robolink import *
 
-stat = Statistics()
+RDK = Robolink()
+stat = Statistics(RDK)
 stat.__str__()

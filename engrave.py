@@ -28,7 +28,7 @@ class Engrave:
         self.curve = CaseConfig.curve_style()
         self.color = CaseConfig.colour()
         self.RDK = rdk
-        self.stat = Statistics(rdk)
+        self.stat = Statistics()
 
     @staticmethod
     def point2d_2_pose(point, tangent):
@@ -74,7 +74,7 @@ class Engrave:
             point_0.switchXY()
             orient_frame2tool = invH(item_frame.Pose()) * robot.SolveFK(robot.JointsHome()) * tool_frame.Pose()
             orient_frame2tool[0:3, 3] = Mat([0, 0, 0])
-            target0 = transl(point_0.x, point_0.y, -300) * orient_frame2tool * Pose(0, 0, 0, -180, 0, 270)
+            target0 = transl(point_0.x, point_0.y, -299) * orient_frame2tool * Pose(0, 0, 0, -180, 0, 270)
             target0_app = target0
             robot.MoveL(target0_app)
 
@@ -87,12 +87,12 @@ class Engrave:
                 path_point.switchXY()
                 path_vector = path.getVector(point)
                 point_pose = self.point2d_2_pose(path_point, path_vector)
-                path_target = transl(path_point.x, path_point.y, -300) * orient_frame2tool * Pose(0, 0, 0, -180, 0, 270)
+                path_target = transl(path_point.x, path_point.y, -299) * orient_frame2tool * Pose(0, 0, 0, -180, 0, 270)
                 print(path_target)
                 robot.MoveL(path_target)
 
                 # create a new pixel object with the calculated pixel pose
-                point_pose = transl(path_point.x+5, 12, -path_point.y+68) * orient_frame2tool * Pose(0, 0, 0, 90, 0, 0)
+                point_pose = transl(path_point.x + 5.2, 12, -path_point.y+67.5) * orient_frame2tool * Pose(0, 0, 0, 90, 0, 0)
                 item.AddGeometry(pix_ref, point_pose)
             target_app = path_target
             robot.MoveL(target_app)
@@ -114,13 +114,15 @@ class Engrave:
         pix_ref = self.RDK.Item('pixel', 5)
         self.move_to_environment()
         stock_str = self.color + '_' + self.curve
-        item = self.RDK.Item(f'cover_{self.color}_edge_{self.stock.get(stock_str)}')
+        stock_int = self.stock.get(f'{self.color}_{self.curve}')
+        stock_int = stock_int + 1
+        item = self.RDK.Item(f'cover_{self.color}_edge_{stock_int}', 5)
 
 
         self.svg.calc_polygon_fit(self.IMAGE_SIZE_EDGE, self._PIXEL_SIZE)
         # size_img = self.svg.size_poly() # Uncertain if needed
         for path in self.svg:
-            path.polygon_move(-20.0, 0)
+            path.polygon_move(-17.5, 15)
             # use the pixel reference to set the path color, set pixel width and copy as a reference
             print('Drawing %s, RGB color = [%.3f,%.3f,%.3f]' % (
                 path.idname, path.fill_color[0], path.fill_color[1], path.fill_color[2]))
@@ -131,7 +133,7 @@ class Engrave:
             point_0.switchXY()
             orient_frame2tool = invH(item_frame.Pose()) * robot.SolveFK(robot.JointsHome()) * tool_frame.Pose()
             orient_frame2tool[0:3, 3] = Mat([0, 0, 0])
-            target0 = transl(point_0.x, point_0.y, -299)  * orient_frame2tool * Pose(0, 0, 0, -180, 0, 270)
+            target0 = transl(point_0.x, point_0.y, -296.38)  * orient_frame2tool * Pose(0, 0, 0, -180, 0, 270)
             target0_app = target0
             robot.MoveL(target0_app)
 
@@ -144,11 +146,12 @@ class Engrave:
                 path_point.switchXY()
                 path_vector = path.getVector(point)
                 point_pose = self.point2d_2_pose(path_point, path_vector)
-                path_target = transl(path_point.x, path_point.y, -299) * orient_frame2tool * Pose(0, 0, 0, -180, 0, 270)
+                path_target = transl(path_point.x, path_point.y, -296.38) * orient_frame2tool * Pose(0, 0, 0, -180, 0, 270)
                 print(path_target)
                 robot.MoveL(path_target)
 
                 # create a new pixel object with the calculated pixel pose
+                point_pose = transl(path_point.x + 5.2, 14.75, -path_point.y + 67.55) * orient_frame2tool * Pose(0, 0, 0, 90, 0, 0)
                 item.AddGeometry(pix_ref, point_pose)
             target_app = path_target
             robot.MoveL(target_app)

@@ -11,9 +11,14 @@ from stock import Stock
 RDK = Robolink()
 stock = Stock()  # For simulating stock
 cover = Cover(CaseConfig.colour(), CaseConfig.curve_style(), stock)
+cover.new_cover_check()
 
-# If the item 'cover color curve_style exists continue  # Uncertain if this works
-if RDK.Item(f'cover_{CaseConfig.colour()}_{CaseConfig.curve_style()}'):
+
+if stock.get(f'{CaseConfig.colour()}_{CaseConfig.curve_style()}') == 0:
+    none_flat_str = CaseConfig.curve_style().replace('none', 'flat', -1)
+    error_str = f'Stock depleted of {CaseConfig.colour()} {none_flat_str} covers'
+    RDK.RunMessage(error_str)
+else:
     cover.give_top()
     if CaseConfig.engrave():
         pattern = Engrave(RDK)
