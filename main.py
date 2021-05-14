@@ -13,7 +13,6 @@ stock = Stock()  # For simulating stock
 cover = Cover(CaseConfig.colour(), CaseConfig.curve_style(), stock)
 cover.new_cover_check()
 
-
 if stock.get(f'{CaseConfig.colour()}_{CaseConfig.curve_style()}') == 0:
     none_flat_str = CaseConfig.curve_style().replace('none', 'flat', -1)
     error_str = f'Stock depleted of {CaseConfig.colour()} {none_flat_str} covers'
