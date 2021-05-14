@@ -95,3 +95,29 @@ class CaseConfig:
             raise KeyError('Error, not a boolean type')
 
         return engrave_bool
+
+    @classmethod
+    def bottom_colour(cls, type_='customer'):
+        """
+        Static class method
+        Checks the value at 'colour' from the config file
+        :param type_: string default 'customer' can be 'default'
+        :return: string contained in key 'colour'
+        """
+        bottom_colour_id = cls.__open_config().get(type_, 'bottom')
+
+        # if we decide to use hex strings instead of colour names, use re to ensure it is valid
+        # import re
+        #
+        # if not re.match('[a-fA-F0-9]', colour_id'):
+        #     raise KeyError('Error, colour code not valid.')
+        #
+        # and append the # when returning
+        # return f'#{colour_id}'
+
+        if bottom_colour_id not in cls._ALLOWED_COLOURS:
+            raise KeyError('Error, colour is not available.')
+
+        # ... other error handling, validation, or mutation
+
+        return bottom_colour_id
