@@ -27,6 +27,9 @@ class Cover:
     _COVER_CAPACITY = Stock.get_init()
     _APPROACH = 100
     _ROBOT_HOME = [0, 0, 0, 90, 0, 0, ]
+    _COLOR_BLACK = [0.1019607843, 0.1019607843, 0.1019607843]
+    _COLOR_WHITE = [1, 1, 1]
+    _COLOR_BLUE = [0, 0, 0.6078431372]
 
 
     def __init__(self, color, curve_type, stock: Stock):
@@ -45,6 +48,14 @@ class Cover:
         self.stat = Statistics()
         self.position = Pose(45.5, self._OFFSETY_COVER_DIST, 0, -180, 0, 0)
         self.correct_pos(self.stock)
+        bottom = self.RDK.Item('bottom', 5)
+        if self.color == 'black':
+            bottom.Recolor(self._COLOR_BLACK)
+        if self.color == 'white':
+            bottom.Recolor(self._COLOR_WHITE)
+        if self.color == 'blue':
+            bottom.Recolor(self._COLOR_BLUE)
+
 
 
     # Define dictionary with the different types and give them an identifier
@@ -147,7 +158,7 @@ class Cover:
         robot.setSpeed(150)
         robot.MoveJ(position_copy)
         if self.curve == 'none':
-            position_copy[2, 3] = position_copy[2, 3] - self._APPROACH
+            position_copy[2, 3] = position_copy[2, 3] - self._APPROACH - 1.75
         elif self.curve == 'edge':
             position_copy[2, 3] = position_copy[2, 3] - self._APPROACH - 1
         elif self.curve == 'curved':
@@ -193,12 +204,12 @@ class Cover:
         # Check the type of cover again and subtract the approach offset,
         # while considering that a cover is attached to the tool
         if self.curve == 'none':
-            position_withoffset[2, 3] = position_withoffset[2, 3] - self._APPROACH + self._OFFSETZ_COVER_FLAT_DIST + 0.25
+            position_withoffset[2, 3] = position_withoffset[2, 3] - self._APPROACH + self._OFFSETZ_COVER_FLAT_DIST - 1.5
         if self.curve == 'edge':
-            position_withoffset[2, 3] = position_withoffset[2, 3] - self._APPROACH + self._OFFSETZ_COVER_EDGE_DIST - 1.47
+            position_withoffset[2, 3] = position_withoffset[2, 3] - self._APPROACH + self._OFFSETZ_COVER_EDGE_DIST - 1.77
         if self.curve == 'curved':
             position_withoffset[2, 3] = position_withoffset[
-                                            2, 3] - self._APPROACH + self._OFFSETZ_COVER_CURVED_DIST - 2.1
+                                            2, 3] - self._APPROACH + self._OFFSETZ_COVER_CURVED_DIST - 2.4
 
         # Take into account that it is now a whole phone
         position_withoffset[2, 3] = position_withoffset[
@@ -264,7 +275,6 @@ class Cover:
 
         engrave_plate_pos_app = Pose(145, 0, 42.5, -180, 0, 90)
         robot.setSpeed(50)
-        engraving_plate_pos = engrave_plate_pos_app
 
         if self.curve == 'none':
             engrave_plate_pos_app[2, 3] = engrave_plate_pos_app[2, 3] + self._APPROACH
@@ -275,11 +285,10 @@ class Cover:
 
 
         robot.MoveJ(engrave_plate_pos_app)
-
         engrave_plate_pos = engrave_plate_pos_app
 
         if self.curve == 'none':
-            engrave_plate_pos[2, 3] = engrave_plate_pos[2, 3] - self._APPROACH
+            engrave_plate_pos[2, 3] = engrave_plate_pos[2, 3] - self._APPROACH - 0.25
         elif self.curve == 'edge':
             engrave_plate_pos[2, 3] = engrave_plate_pos[2, 3] - self._APPROACH
         else:
@@ -320,12 +329,12 @@ class Cover:
         # Check the type of cover again and subtract the approach offset,
         # while considering that a cover is attached to the tool
         if self.curve == 'none':
-            position_withoffset[2, 3] = position_withoffset[2, 3] - self._APPROACH + self._OFFSETZ_COVER_FLAT_DIST
+            position_withoffset[2, 3] = position_withoffset[2, 3] - self._APPROACH + self._OFFSETZ_COVER_FLAT_DIST -3
         if self.curve == 'edge':
             position_withoffset[2, 3] = position_withoffset[2, 3] - self._APPROACH + self._OFFSETZ_COVER_EDGE_DIST -1.5
         if self.curve == 'curved':
             position_withoffset[2, 3] = position_withoffset[
-                                            2, 3] - self._APPROACH + self._OFFSETZ_COVER_CURVED_DIST
+                                            2, 3] - self._APPROACH + self._OFFSETZ_COVER_CURVED_DIST - 5
 
         # Take into account that it is now a whole phone
         position_withoffset[2, 3] = position_withoffset[
@@ -352,8 +361,6 @@ class Cover:
         }
 
         for key in cover_types:
-            stock_int = self.stock.get(f'{cover_types[key]}')
-            stock_int = stock_int + 1
-            item = self.RDK.Item(f'cover_{cover_types[key]}_{stock_int}')
+            item = self.RDK.Item(f'cover_{cover_types[key]}_{self.stock.get(f"{cover_types[key]}") + 1}')
             if item.Valid():
                 item.Delete()
