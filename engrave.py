@@ -11,7 +11,7 @@ import os
 class Engrave:
     _APPROACH = 100
     IMAGE_SIZE_NONE = svg.Point(50, 104)  # size of the image in MM not including edge (2mm)
-    IMAGE_SIZE_EDGE = svg.Point(40, 104)  # size of image in MM not including edge (??? mm)
+    IMAGE_SIZE_EDGE = svg.Point(38, 102)  # size of image in MM not including edge (??? mm)
     IMAGE_SIZE_CURVED = svg.Point(56, 108)  # size of image in MM not including edge (??? mm)
     stock = Stock()
     _PIXEL_SIZE = 0.5
@@ -128,7 +128,7 @@ class Engrave:
         self.svg.calc_polygon_fit(self.IMAGE_SIZE_EDGE, self._PIXEL_SIZE)
         # size_img = self.svg.size_poly() # Uncertain if needed
         for path in self.svg:
-            path.polygon_move(-30, 20)
+            path.polygon_move(-20.25, 20)
             # use the pixel reference to set the path color, set pixel width and copy as a reference
             print('Drawing %s, RGB color = [%.3f,%.3f,%.3f]' % (
                 path.idname, path.fill_color[0], path.fill_color[1], path.fill_color[2]))
@@ -187,7 +187,7 @@ class Engrave:
         self.svg.calc_polygon_fit(self.IMAGE_SIZE_CURVED, self._PIXEL_SIZE)
         # size_img = self.svg.size_poly() # Uncertain if needed
         for path in self.svg:
-            path.polygon_move(-23, 19)
+            path.polygon_move(-29.5, 8)
             # use the pixel reference to set the path color, set pixel width and copy as a reference
             print('Drawing %s, RGB color = [%.3f,%.3f,%.3f]' % (
                 path.idname, path.fill_color[0], path.fill_color[1], path.fill_color[2]))
@@ -198,7 +198,7 @@ class Engrave:
             point_0.switchXY()
             orient_frame2tool = invH(item_frame.Pose()) * robot.SolveFK(robot.JointsHome()) * tool_frame.Pose()
             orient_frame2tool[0:3, 3] = Mat([0, 0, 0])
-            target0 = transl(point_0.x, point_0.y, -302.8+self.curved_add_z(fabs(point_0.y)-23.3)) * orient_frame2tool * Pose(0, 0, 0, -180, 0, 270)
+            target0 = transl(point_0.x, point_0.y, -304.8+self.curved_add_z(fabs(point_0.y)-23.3)) * orient_frame2tool * Pose(0, 0, 0, -180, 0, 270)
             target0_app = target0
             robot.MoveL(target0_app)
 
@@ -211,18 +211,18 @@ class Engrave:
                 path_point.switchXY()
                 path_vector = path.getVector(point)
                 point_pose = self.point2d_2_pose(path_point, path_vector)
-                path_target = transl(path_point.x, path_point.y, -302.8 + self.curved_add_z(fabs(path_point.y)-23.3)) * orient_frame2tool * Pose(0, 0, 0, -180, 0, 270)
+                path_target = transl(path_point.x, path_point.y, -304.8 + self.curved_add_z(fabs(path_point.y)-23.3)) * orient_frame2tool * Pose(0, 0, 0, -180, 0, 270)
 
                 robot.MoveL(path_target)
 
                 # create a new pixel object with the calculated pixel pose 20.67
-                point_pose = transl(path_point.x + 5.2, 12+self.curved_add_z(fabs(path_point.y)-23.3), -path_point.y +67.55) * orient_frame2tool * Pose(0, 0, 0, 90, 0, 0)
+                point_pose = transl(path_point.x + 5.2, 8.8+self.curved_add_z(fabs(path_point.y)-31.3), -path_point.y +67.55) * orient_frame2tool * Pose(0, 0, 0, 90, 0, 0)
                 print(point_pose)
                 item.AddGeometry(pix_ref, point_pose)
             target_app = path_target
             robot.MoveL(target_app)
 
-        robot.MoveJ(robot.JointsHome())
+        robot.MoveJ(Pose(0, -23.3, -259, 0, 0, 90))
         self.move_from_environment()
         stat_str = self.color + '_' + self.curve + '_engraved'
         self.stat.add(stat_str, 1)

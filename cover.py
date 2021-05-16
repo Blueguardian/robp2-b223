@@ -14,19 +14,18 @@ from statistics import Statistics
 class Cover:
     # Global class variables
     # Distances in mm
-    _OFFSETZ_NONE = 50
+    _OFFSETZ_NONE = 50.25
     _OFFSETZ_EDGE = 25
-    _OFFSETZ_CURVED = 0.4
+    _OFFSETZ_CURVED = 4.4
     _OFFSETX_COVER_DIST = 70
     _OFFSETY_COVER_DIST = 73
     _OFFSETZ_COVER_FLAT_DIST = 11.7
     _OFFSETZ_COVER_EDGE_DIST = 14.7
-    _OFFSETZ_COVER_CURVED_DIST = 17.2
+    _OFFSETZ_COVER_CURVED_DIST = 16.7
     _BOTTOM_COVER_HEIGHT = 13
     _TOP_COVER_INDENT_OFFSET = 5
     _COVER_CAPACITY = Stock.get_init()
     _APPROACH = 100
-    _ROBOT_HOME = [0, 0, 0, 90, 0, 0, ]
     _COLOR_BLACK = [0.1019607843, 0.1019607843, 0.1019607843]
     _COLOR_WHITE = [1, 1, 1]
     _COLOR_BLUE = [0, 0, 0.6078431372]
@@ -49,11 +48,11 @@ class Cover:
         self.position = Pose(45.5, self._OFFSETY_COVER_DIST, 0, -180, 0, 0)
         self.correct_pos(self.stock)
         bottom = self.RDK.Item('bottom', 5)
-        if self.color == 'black':
+        if CaseConfig.bottom_colour() == 'black':
             bottom.Recolor(self._COLOR_BLACK)
-        if self.color == 'white':
+        if CaseConfig.bottom_colour() == 'white':
             bottom.Recolor(self._COLOR_WHITE)
-        if self.color == 'blue':
+        if CaseConfig.bottom_colour() == 'blue':
             bottom.Recolor(self._COLOR_BLUE)
 
 
@@ -100,11 +99,11 @@ class Cover:
         curvature = case_curve[f'{self.curve}']
         print(curvature)
         if curvature == 1:
-            self.position[2, 3] = self.position[2, 3] + self._OFFSETZ_EDGE + 1
+            self.position[2, 3] = self.position[2, 3] + self._OFFSETZ_EDGE
         if curvature == 2:
-            self.position[2, 3] = self.position[2, 3] + self._OFFSETZ_NONE + 1
+            self.position[2, 3] = self.position[2, 3] + self._OFFSETZ_NONE
         if curvature == 0:
-            self.position[2, 3] = self.position[2, 3] + self._OFFSETZ_CURVED + 1
+            self.position[2, 3] = self.position[2, 3] + self._OFFSETZ_CURVED
 
         identifier = case_types[f'{self.color}_{self.curve}']
         self.position[0, 3] = self.position[0, 3] + identifier * self._OFFSETX_COVER_DIST
@@ -148,25 +147,29 @@ class Cover:
         robot.setPoseFrame(frame)
         position_copy = self.position
         if self.curve == 'none':
-            position_copy[2, 3] = position_copy[2, 3] + self._APPROACH
+            position_copy[2, 3] = position_copy[2, 3] + self._APPROACH + self.stock.get_init() * self._OFFSETZ_COVER_FLAT_DIST
         elif self.curve == 'edge':
-            position_copy[2, 3] = position_copy[2, 3] + self._APPROACH
+            position_copy[2, 3] = position_copy[2, 3] + self._APPROACH + self.stock.get_init() * self._OFFSETZ_COVER_EDGE_DIST
         elif self.curve == 'curved':
-            position_copy[2, 3] = position_copy[2, 3] + self._APPROACH + 1
+            position_copy[2, 3] = position_copy[2, 3] + self._APPROACH + self.stock.get_init() * self._OFFSETZ_COVER_CURVED_DIST
         robot.MoveJ(position_copy)
 
         robot.setSpeed(150)
-        robot.MoveJ(position_copy)
         if self.curve == 'none':
-            position_copy[2, 3] = position_copy[2, 3] - self._APPROACH - 1.75
+            position_copy[2, 3] = position_copy[2, 3] - self._APPROACH - self.stock.get_init() * self._OFFSETZ_COVER_FLAT_DIST
         elif self.curve == 'edge':
-            position_copy[2, 3] = position_copy[2, 3] - self._APPROACH - 1
+            position_copy[2, 3] = position_copy[2, 3] - self._APPROACH - self.stock.get_init() * self._OFFSETZ_COVER_EDGE_DIST
         elif self.curve == 'curved':
-            position_copy[2, 3] = position_copy[2, 3] - self._APPROACH - 2.5
+            position_copy[2, 3] = position_copy[2, 3] - self._APPROACH - self.stock.get_init() * self._OFFSETZ_COVER_CURVED_DIST
         robot.MoveL(position_copy)
         self.RDK.RunProgram('Prog6')
 
-        position_copy[2, 3] = position_copy[2, 3] + self._APPROACH
+        if self.curve == 'none':
+            position_copy[2, 3] = position_copy[2, 3] + self._APPROACH + self.stock.get_init() * self._OFFSETZ_COVER_FLAT_DIST
+        elif self.curve == 'edge':
+            position_copy[2, 3] = position_copy[2, 3] + self._APPROACH + self.stock.get_init() * self._OFFSETZ_COVER_EDGE_DIST
+        elif self.curve == 'curved':
+            position_copy[2, 3] = position_copy[2, 3] + self._APPROACH + self.stock.get_init() * self._OFFSETZ_COVER_CURVED_DIST
         robot.MoveL(position_copy)
         robot.setSpeed(150)
         self.stock.sub(f'{self.color}_{self.curve}', 1)
@@ -192,7 +195,6 @@ class Cover:
 
         self.RDK.Connect()
         robot = self.RDK.Item('fanuc', 2)
-        robot.setTool(Pose(0, 0, 225.75, 0, 0, 0))
         self.grab(robot)
 
         carrier_ = self.RDK.Item('carrier', 3)
@@ -224,6 +226,8 @@ class Cover:
         robot.MoveL(carrier_position_app)
         robot.setSpeed(150)
         engrave_check = CaseConfig.engrave()
+        stat_str = self.color + '_' + self.curve
+        self.stat.add(stat_str, 1)
 
         if engrave_check:
             engrave_plate_ref = self.RDK.Item('engraving_plate_ref', 3)
@@ -273,7 +277,7 @@ class Cover:
         robot = self.RDK.Item('fanuc', 3)
         robot.setPoseFrame(engrave_plate_ref)
 
-        engrave_plate_pos_app = Pose(145, 0, 42.5, -180, 0, 90)
+        engrave_plate_pos_app = Pose(145.29, 0.05, 42.5, -180, 0, 90)
         robot.setSpeed(50)
 
         if self.curve == 'none':
@@ -290,7 +294,7 @@ class Cover:
         if self.curve == 'none':
             engrave_plate_pos[2, 3] = engrave_plate_pos[2, 3] - self._APPROACH - 0.25
         elif self.curve == 'edge':
-            engrave_plate_pos[2, 3] = engrave_plate_pos[2, 3] - self._APPROACH
+            engrave_plate_pos[2, 3] = engrave_plate_pos[2, 3] - self._APPROACH + 1.6
         else:
             engrave_plate_pos[2, 3] = engrave_plate_pos[2, 3] - self._APPROACH
 
@@ -329,9 +333,9 @@ class Cover:
         # Check the type of cover again and subtract the approach offset,
         # while considering that a cover is attached to the tool
         if self.curve == 'none':
-            position_withoffset[2, 3] = position_withoffset[2, 3] - self._APPROACH + self._OFFSETZ_COVER_FLAT_DIST -3
+            position_withoffset[2, 3] = position_withoffset[2, 3] - self._APPROACH + self._OFFSETZ_COVER_FLAT_DIST - 1.85
         if self.curve == 'edge':
-            position_withoffset[2, 3] = position_withoffset[2, 3] - self._APPROACH + self._OFFSETZ_COVER_EDGE_DIST -1.5
+            position_withoffset[2, 3] = position_withoffset[2, 3] - self._APPROACH + self._OFFSETZ_COVER_EDGE_DIST - 1.27
         if self.curve == 'curved':
             position_withoffset[2, 3] = position_withoffset[
                                             2, 3] - self._APPROACH + self._OFFSETZ_COVER_CURVED_DIST - 5
