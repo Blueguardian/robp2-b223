@@ -121,3 +121,14 @@ class CaseConfig:
         # ... other error handling, validation, or mutation
 
         return bottom_colour_id
+
+    @classmethod
+    def set_var(cls, key_, value, type_='customer'):
+        if key_ == 'file':
+            if not os.path.isfile(value) and value != '':
+                raise FileNotFoundError('Error, file does not exist')
+        config = cls.__open_config()
+        config.set(type_, key_, value)
+        with open('config.ini', 'w') as configfile:
+            config.write(configfile)
+
