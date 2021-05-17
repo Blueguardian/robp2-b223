@@ -7,7 +7,9 @@ from config import CaseConfig
 from cover import Cover
 from engrave import Engrave
 from stock import Stock
+from gui import gui
 
+GUI = gui()
 RDK = Robolink()
 stock = Stock()  # For simulating stock
 cover = Cover(CaseConfig.colour(), CaseConfig.curve_style(), stock)
