@@ -10,9 +10,9 @@ import os
 
 class Engrave:
     _APPROACH = 100
-    IMAGE_SIZE_NONE = svg.Point(50, 104)  # size of the image in MM not including edge (2mm)
-    IMAGE_SIZE_EDGE = svg.Point(38, 102)  # size of image in MM not including edge (??? mm)
-    IMAGE_SIZE_CURVED = svg.Point(56, 108)  # size of image in MM not including edge (??? mm)
+    IMAGE_SIZE_NONE = svg.Point(104, 50)  # size of the image in MM not including edge (2mm)
+    IMAGE_SIZE_EDGE = svg.Point(102, 38)  # size of image in MM not including edge (??? mm)
+    IMAGE_SIZE_CURVED = svg.Point(108, 56)  # size of image in MM not including edge (??? mm)
     stock = Stock()
     _PIXEL_SIZE = 0.5
 
@@ -39,11 +39,12 @@ class Engrave:
         :param tangent: Tangent object containing method angle
         :return: Returns a 4 x 4 matrix of the point
         """
-        return transl(point.x, point.y, 0)* rotz(tangent.angle())
+        return transl(point.x, point.y, 0) * rotz(tangent.angle())
 
     @staticmethod
     def curved_add_z(x):
-        y = pow(57, 2)-pow(x, 2)
+        x = fabs(x+23.3)
+        y = pow(57, 2)-pow(x-57, 2)
         z = (8/57)*sqrt(y)
         return z
 
@@ -73,7 +74,7 @@ class Engrave:
             path.polygon_move(-27, 0)
             # use the pixel reference to set the path color, set pixel width and copy as a reference
             print('Drawing %s, RGB color = [%.3f,%.3f,%.3f]' % (
-                path.idname, path.fill_color[0], path.fill_color[1], path.fill_color[2]))
+                path.idname, 0, 0, 0))
             pix_ref.Recolor(path.fill_color)
             pix_ref.Copy()
             point_quantity = path.nPoints()
@@ -87,7 +88,7 @@ class Engrave:
 
             self.RDK.RunMessage('Drawing %s' % path.idname)
             self.RDK.RunProgram('SetColorRGB(%.3f,%.3f,%.3f)' % (
-                path.fill_color[0], path.fill_color[1], path.fill_color[2]))
+                0, 0, 0))
 
             for point in range(point_quantity):
                 path_point = path.getPoint(point)
@@ -131,7 +132,7 @@ class Engrave:
             path.polygon_move(-20.25, 20)
             # use the pixel reference to set the path color, set pixel width and copy as a reference
             print('Drawing %s, RGB color = [%.3f,%.3f,%.3f]' % (
-                path.idname, path.fill_color[0], path.fill_color[1], path.fill_color[2]))
+                path.idname, 0, 0, 0))
             pix_ref.Recolor(path.fill_color)
             pix_ref.Copy()
             point_quantity = path.nPoints()
@@ -145,7 +146,7 @@ class Engrave:
 
             self.RDK.RunMessage('Drawing %s' % path.idname)
             self.RDK.RunProgram('SetColorRGB(%.3f,%.3f,%.3f)' % (
-                path.fill_color[0], path.fill_color[1], path.fill_color[2]))
+                0, 0, 0))
 
             for point in range(point_quantity):
                 path_point = path.getPoint(point)
@@ -185,12 +186,11 @@ class Engrave:
         robot.setSpeed(1000)
 
         self.svg.calc_polygon_fit(self.IMAGE_SIZE_CURVED, self._PIXEL_SIZE)
-        # size_img = self.svg.size_poly() # Uncertain if needed
         for path in self.svg:
-            path.polygon_move(-29.5, 8)
+            path.polygon_move(-29.5, -21.3)
             # use the pixel reference to set the path color, set pixel width and copy as a reference
             print('Drawing %s, RGB color = [%.3f,%.3f,%.3f]' % (
-                path.idname, path.fill_color[0], path.fill_color[1], path.fill_color[2]))
+                path.idname, 0, 0, 0))
             pix_ref.Recolor(path.fill_color)
             pix_ref.Copy()
             point_quantity = path.nPoints()
@@ -198,25 +198,25 @@ class Engrave:
             point_0.switchXY()
             orient_frame2tool = invH(item_frame.Pose()) * robot.SolveFK(robot.JointsHome()) * tool_frame.Pose()
             orient_frame2tool[0:3, 3] = Mat([0, 0, 0])
-            target0 = transl(point_0.x, point_0.y, -304.8+self.curved_add_z(fabs(point_0.y)-23.3)) * orient_frame2tool * Pose(0, 0, 0, -180, 0, 270)
+            target0 = transl(point_0.x, point_0.y, -302.1+self.curved_add_z(point_0.y)) * orient_frame2tool * Pose(0, 0, 0, -180, 0, 270)
             target0_app = target0
             robot.MoveL(target0_app)
 
             self.RDK.RunMessage('Drawing %s' % path.idname)
             self.RDK.RunProgram('SetColorRGB(%.3f,%.3f,%.3f)' % (
-                path.fill_color[0], path.fill_color[1], path.fill_color[2]))
+                0, 0, 0))
 
             for point in range(point_quantity):
                 path_point = path.getPoint(point)
                 path_point.switchXY()
                 path_vector = path.getVector(point)
                 point_pose = self.point2d_2_pose(path_point, path_vector)
-                path_target = transl(path_point.x, path_point.y, -304.8 + self.curved_add_z(fabs(path_point.y)-23.3)) * orient_frame2tool * Pose(0, 0, 0, -180, 0, 270)
+                path_target = transl(path_point.x, path_point.y, -302.1 + self.curved_add_z(path_point.y)) * orient_frame2tool * Pose(0, 0, 0, -180, 0, 270)
 
                 robot.MoveL(path_target)
 
                 # create a new pixel object with the calculated pixel pose 20.67
-                point_pose = transl(path_point.x + 5.2, 8.8+self.curved_add_z(fabs(path_point.y)-31.3), -path_point.y +67.55) * orient_frame2tool * Pose(0, 0, 0, 90, 0, 0)
+                point_pose = transl(path_point.x + 5.2, 8.8+self.curved_add_z(path_point.y), -path_point.y +67.55) * orient_frame2tool * Pose(0, 0, 0, 90, 0, 0)
                 print(point_pose)
                 item.AddGeometry(pix_ref, point_pose)
             target_app = path_target
