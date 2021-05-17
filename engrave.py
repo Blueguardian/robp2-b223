@@ -186,8 +186,10 @@ class Engrave:
         robot.setSpeed(1000)
 
         self.svg.calc_polygon_fit(self.IMAGE_SIZE_CURVED, self._PIXEL_SIZE)
+        size_img = self.svg.size_poly() # Uncertain if needed
+        placement_var = -21.3+self.IMAGE_SIZE_CURVED.x/2-size_img.x/2
         for path in self.svg:
-            path.polygon_move(-29.5, -21.3)
+            path.polygon_move(-29.5, placement_var)
             # use the pixel reference to set the path color, set pixel width and copy as a reference
             print('Drawing %s, RGB color = [%.3f,%.3f,%.3f]' % (
                 path.idname, 0, 0, 0))
