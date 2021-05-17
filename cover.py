@@ -222,14 +222,14 @@ class Cover:
         str_cover = f'{self.color}_{self.curve}'
         cover = self.RDK.Item(f'cover_{self.color}_{self.curve}_{self.stock.get(str_cover)}')
         self.RDK.RunProgram('Prog7')
-        carrier_position_app[2, 3] = carrier_position_app[2, 3] + self._APPROACH
-        robot.MoveL(carrier_position_app)
         robot.setSpeed(150)
         engrave_check = CaseConfig.engrave()
         stat_str = self.color + '_' + self.curve
         self.stat.add(stat_str, 1)
 
         if engrave_check:
+            carrier_position_app[2, 3] = carrier_position_app[2, 3] + self._APPROACH
+            robot.MoveL(carrier_position_app)
             engrave_plate_ref = self.RDK.Item('engraving_plate_ref', 3)
             robot.setPoseFrame(engrave_plate_ref)
             engrave_plate_pos_app = Pose(145.29, 0.05, 42.6, -180, 0, 90)
@@ -266,6 +266,13 @@ class Cover:
             robot.MoveL(engrave_plate_pos)
             robot.MoveJ(robot.JointsHome())
             self.RDK.RunProgram('Prog8')
+
+        else:
+            tool_suction_ = self.RDK.Item('tool_suction', 4)
+            tool_suction_.DetachAll()
+            carrier_position_app[2, 3] = carrier_position_app[2, 3] + self._APPROACH
+            robot.MoveL(carrier_position_app)
+            robot.MoveJ(robot.JointsHome())
 
     def retrieve(self):
         """
