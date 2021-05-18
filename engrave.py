@@ -103,7 +103,7 @@ class Engrave:
             orient_frame2tool[0:3, 3] = Mat([0, 0, 0])
 
             # Get the first target, and align it with the tool and move the robot there
-            target0 = transl(point_0.x, point_0.y, -299) * orient_frame2tool * Pose(0, 0, 0, -180, 0, 270)
+            target0 = transl(-point_0.x, point_0.y, -299) * orient_frame2tool * Pose(0, 0, 0, -180, 0, 270)
             robot.MoveL(target0)
 
             # Set the color in RoboDK
@@ -118,11 +118,11 @@ class Engrave:
                 path_point.switchXY()
 
                 # Calculate the target based on the points, a height and orientation of the tool and move the engraver
-                path_target = transl(path_point.x, path_point.y, -299) * orient_frame2tool * Pose(0, 0, 0, -180, 0, 270)
+                path_target = transl(-path_point.x, path_point.y, -299) * orient_frame2tool * Pose(0, 0, 0, -180, 0, 270)
                 robot.MoveL(path_target)
 
                 # create a new pixel object with the calculated pixel pose and add it to the cover
-                point_pose = transl(path_point.x + 5.2, 12, -path_point.y+67.55) * orient_frame2tool * Pose(0, 0, 0, 90, 0, 0)
+                point_pose = transl(-path_point.x + 5.2, 12, -path_point.y+67.55) * orient_frame2tool * Pose(0, 0, 0, 90, 0, 0)
                 item.AddGeometry(pix_ref, point_pose)
 
             # Move to the end point
@@ -182,7 +182,7 @@ class Engrave:
             orient_frame2tool[0:3, 3] = Mat([0, 0, 0])
 
             # Get the first target, and align it with the tool and move the robot there
-            target0 = transl(point_0.x, point_0.y, -296.38) * orient_frame2tool * Pose(0, 0, 0, -180, 0, 270)
+            target0 = transl(-point_0.x, point_0.y, -296.38) * orient_frame2tool * Pose(0, 0, 0, -180, 0, 270)
             target0_app = target0
             robot.MoveL(target0_app)
 
@@ -198,11 +198,11 @@ class Engrave:
                 path_point.switchXY()
 
                 # Calculate the target based on the points, a height and orientation of the tool and move the engraver
-                path_target = transl(path_point.x, path_point.y, -296.38) * orient_frame2tool * Pose(0, 0, 0, -180, 0, 270)
+                path_target = transl(-path_point.x, path_point.y, -296.38) * orient_frame2tool * Pose(0, 0, 0, -180, 0, 270)
                 robot.MoveL(path_target)
 
                 # create a new pixel object with the calculated pixel pose and add it to the cover
-                point_pose = transl(path_point.x + 5.2, 14.75, -path_point.y + 67.55) * orient_frame2tool * Pose(0, 0, 0, 90, 0, 0)
+                point_pose = transl(-path_point.x + 5.2, 14.75, -path_point.y + 67.55) * orient_frame2tool * Pose(0, 0, 0, 90, 0, 0)
                 item.AddGeometry(pix_ref, point_pose)
 
             # Move to the end point
@@ -262,7 +262,7 @@ class Engrave:
             orient_frame2tool[0:3, 3] = Mat([0, 0, 0])
 
             # Get the first target, and align it with the tool and move the robot there
-            target0 = transl(point_0.x, point_0.y, -302.1+self.curved_add_z(point_0.y)) * orient_frame2tool * Pose(0, 0, 0, -180, 0, 270)
+            target0 = transl(-point_0.x, point_0.y, -302.1+self.curved_add_z(point_0.y)) * orient_frame2tool * Pose(0, 0, 0, -180, 0, 270)
             target0_app = target0
             robot.MoveL(target0_app)
 
@@ -278,11 +278,11 @@ class Engrave:
                 path_point.switchXY()
 
                 # Calculate the target based on the points, a height and orientation of the tool and move the engraver
-                path_target = transl(path_point.x, path_point.y, -302.1 + self.curved_add_z(path_point.y)) * orient_frame2tool * Pose(0, 0, 0, -180, 0, 270)
+                path_target = transl(-path_point.x, path_point.y, -302.1 + self.curved_add_z(path_point.y)) * orient_frame2tool * Pose(0, 0, 0, -180, 0, 270)
                 robot.MoveL(path_target)
 
                 # create a new pixel object with the calculated pixel pose 20.67
-                point_pose = transl(path_point.x + 5.2, 8.8+self.curved_add_z(path_point.y), -path_point.y +67.55) * orient_frame2tool * Pose(0, 0, 0, 90, 0, 0)
+                point_pose = transl(-path_point.x + 5.2, 8.8+self.curved_add_z(path_point.y), -path_point.y +67.55) * orient_frame2tool * Pose(0, 0, 0, 90, 0, 0)
 
                 # create a new pixel object with the calculated pixel pose and add it to the cover
                 item.AddGeometry(pix_ref, point_pose)
