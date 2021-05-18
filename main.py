@@ -8,6 +8,8 @@ from cover import Cover
 from engrave import Engrave
 from stock import Stock
 from gui import gui
+from timer import Timer
+from datetime import datetime
 
 # Main function for the handling of new covers in the Smart lab project
 # This begins by calling the gui class for customer product selection and ordering
@@ -16,11 +18,13 @@ from gui import gui
 # If the customer has selected engraving, it will start an engraving process based
 # upon the chosen type and colour of the cover and then retrieves it.
 
+
 gui()
 RDK = Robolink()
 RDK.setSimulationSpeed(1)
 stock = Stock()  # For simulating stock
-
+time = Timer()
+start = datetime.now()
 #Creates a new cover object, and checks whether a cover previously used is existant, if it is it deletes it
 cover = Cover(CaseConfig.colour(), CaseConfig.curve_style(), stock)
 cover.new_cover_check()
@@ -32,13 +36,14 @@ if stock.get(f'{CaseConfig.colour()}_{CaseConfig.curve_style()}') == 0:
     RDK.RunMessage(error_str)
 # Else run the program
 else:
-    cover.give_top()
+    cover.give_top(time)
     if CaseConfig.engrave():
         pattern = Engrave(RDK)
         if CaseConfig.curve_style() == 'none':
-            pattern.begin_flat()
+            pattern.begin_flat(time)
         if CaseConfig.curve_style() == 'edge':
-            pattern.begin_edge()
+            pattern.begin_edge(time)
         if CaseConfig.curve_style() == 'curved':
-            pattern.begin_curved()
+            pattern.begin_curved(time)
         cover.retrieve()
+    time.end('average_total_time', start)

@@ -4,6 +4,8 @@ from config import CaseConfig
 from stock import Stock
 from statistics import Statistics
 from math import sqrt, pow, fabs
+from timer import Timer
+from datetime import datetime
 
 import os
 
@@ -58,13 +60,14 @@ class Engrave:
         z = (8/57)*sqrt(y)
         return z
 
-    def begin_flat(self):
+    def begin_flat(self, time: Timer):
         """
         Engraving for flat covers
         Instructions sent to the robot in RoboDK for engraving the flat cover depending on the file given
         """
 
         # Initialization of the robot, reference frame, tool and the pixel object and set the speed
+        start = datetime.now()
         robot = self.RDK.Item('engraver', 2)
         robot.setSpeed(1200)
         robot.setAcceleration(2000)
@@ -138,14 +141,16 @@ class Engrave:
         # Add the engraving to the statistics
         stat_str = self.color + '_' + self.curve + '_engraved'
         self.stat.add(stat_str, 1)
+        time.end('average_engraving_time', start)
 
-    def begin_edge(self):
+    def begin_edge(self, time: Timer):
         """
         Engraving for curved edges covers
         Instructions sent to the robot in RoboDK for engraving the curved edges cover depending on the file given
         """
 
         # Initialization of the robot, reference frame, tool and the pixel object
+        start = datetime.now()
         robot = self.RDK.Item('engraver', 2)
         robot.setSpeed(1200)
         robot.setAcceleration(2000)
@@ -220,14 +225,16 @@ class Engrave:
         # Add the engraving to the statistics
         stat_str = self.color + '_' + self.curve + '_engraved'
         self.stat.add(stat_str, 1)
+        time.end('average_engraving_time', start)
 
-    def begin_curved(self):
+    def begin_curved(self, time: Timer):
         """
         Engraving for curved covers
         Instructions sent to the robot in RoboDK for engraving the curved cover depending on the file given
         """
 
         # Initialization of the robot, reference frame, tool and the pixel object
+        start = datetime.now()
         robot = self.RDK.Item('engraver', 2)
         robot.setSpeed(1200)
         robot.setAcceleration(2000)
@@ -304,6 +311,7 @@ class Engrave:
         # Add the engraving to the statistics
         stat_str = self.color + '_' + self.curve + '_engraved'
         self.stat.add(stat_str, 1)
+        time.end('average_engraving_time', start)
 
     def move_to_environment(self):
         """
