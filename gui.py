@@ -15,7 +15,7 @@ class gui:
 
         # Creates a window to add widgets to and sets it's size
         self.root = Tk(None, None, "Order selection")
-        self.root.geometry("700x400")
+        self.root.geometry("900x400")
 
         # Allowed options for given variables
         COLOR_OPTIONS = ["black", "white", "blue"]
