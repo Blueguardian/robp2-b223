@@ -29,22 +29,26 @@ The simulation is based on calculations in RoboDK, which cannot is NOT entirely 
 The simulation can do a couple of thins that will be introduced and documented here:
 
 ### Simulation scripts
-**The script called 'main':**
+#### The script called 'main':
 The main script of the simulation opens a GUI where you can select what colour top- and bottom cover you would like to have produced along with options for
 curvature of the cover. The GUI also includes options for engraving, one asking the user if theu would like the phone engraved and an option for uploading your
 own .scg image for engraving.
 
-When you are done selecting the options you would like for your phone, clcik the button marked "Order" in the bottom of the GUI. The process of creating the phone
+When you are done selecting the options you would like for your phone, click the button marked "Order" in the bottom of the GUI. The process of creating the phone
 will then begin, to speed up the process you can change perspective to the engraving environment (the small black box) as rendering this from afar is quite slow). 
 When the process is finished it will depending on your settings prompt with a "script successfully run" window. This concludes the main script.
 
-**NOTE: The time used in the simulation is not considered equal to the real time used as this is highly dependant on your GPU and Processor**
+**NOTE: The time used in the simulation is not considered equal to the real time used as this is highly dependant on your GPU and CPU**
 
-**The script called 'restock':**
+##### Time note:
+The time used on engraving is highly dependant on the complexity of the image and the desired quality (not changeable by user). This means that the more complex
+the image is the longer it takes for the engraving to be completed, therefore not always completing in the required time. The time used can be changed by changing the quality of the engraving in the script (decreasing or increasing the _PIXEL_SIZE field in engraving.py), this will have a high impact on time, but the image quickly becomes fragmented and blurry by lowering (increasing _PIXEL_SIZE field) the quality. By increasing the quality (decreasing _PIXEL_SIZE field) the time quickly increases to above the desired time.
+
+#### The script called 'restock':
 The restock script MUST only be used on a hard reset of the simulation as this resets the sim stock, without changing the amount of covers left in the storage container. The reasoning behind not creating a script adding alle the covers again is that after each object added to RoboDK the simulation has to wait 60 seconds
 before another action can be performed (Stated in the API code) The would add up to 90 minutes to include all covers again.
 
-**The script called 'call_stat':**
+#### The script called 'call_stat':
 The call stat or call statistics script is for showing the amount of different covers created along with how many of these that have been engraved. This is the 
 data that is simulated for integrating Industry 4.0 intro the project, as this alloweds data to be collected of how many covers of each type is created.
 
