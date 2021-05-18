@@ -18,6 +18,7 @@ from gui import gui
 
 gui()
 RDK = Robolink()
+RDK.setSimulationSpeed(1)
 stock = Stock()  # For simulating stock
 
 #Creates a new cover object, and checks whether a cover previously used is existant, if it is it deletes it

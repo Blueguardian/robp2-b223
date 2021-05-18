@@ -14,7 +14,7 @@ class Engrave:
     IMAGE_SIZE_EDGE = svg.Point(100, 36)  # size of image in MM not including edge
     IMAGE_SIZE_CURVED = svg.Point(108, 56)  # size of image in MM not including edge
     stock = Stock()
-    _PIXEL_SIZE = 0.5  # For calculating the arc length of the images
+    _PIXEL_SIZE = 1.2  # For calculating the arc length of the images
 
     def __init__(self, rdk):
         """
@@ -64,8 +64,10 @@ class Engrave:
         Instructions sent to the robot in RoboDK for engraving the flat cover depending on the file given
         """
 
-        # Initialization of the robot, reference frame, tool and the pixel object
+        # Initialization of the robot, reference frame, tool and the pixel object and set the speed
         robot = self.RDK.Item('engraver', 2)
+        robot.setSpeed(1200)
+        robot.setAcceleration(2000)
         item_frame = self.RDK.Item('engrave_flat', 3)
         tool_frame = self.RDK.Item('laser_tool', 4)
         pix_ref = self.RDK.Item('pixel', 5)
@@ -145,6 +147,8 @@ class Engrave:
 
         # Initialization of the robot, reference frame, tool and the pixel object
         robot = self.RDK.Item('engraver', 2)
+        robot.setSpeed(1200)
+        robot.setAcceleration(2000)
         item_frame = self.RDK.Item('engrave_flat', 3)
         tool_frame = self.RDK.Item('laser_tool', 4)
         pix_ref = self.RDK.Item('pixel', 5)
@@ -166,7 +170,7 @@ class Engrave:
         for path in self.svg:
 
             # Align the image with the cover
-            path.polygon_move(-20.45, placement_var)
+            path.polygon_move(-17, placement_var)
 
             # Recolour the pixel to black and copy it for simulating engraving
             pix_ref.Recolor([0, 0, 0, 1])
@@ -225,6 +229,8 @@ class Engrave:
 
         # Initialization of the robot, reference frame, tool and the pixel object
         robot = self.RDK.Item('engraver', 2)
+        robot.setSpeed(1200)
+        robot.setAcceleration(2000)
         item_frame = self.RDK.Item('engrave_flat', 3)
         tool_frame = self.RDK.Item('laser_tool', 4)
         pix_ref = self.RDK.Item('pixel', 5)
@@ -246,7 +252,7 @@ class Engrave:
         for path in self.svg:
 
             # Align the image with the cover
-            path.polygon_move(-29.5, placement_var)
+            path.polygon_move(-27.5, placement_var)
 
             # Recolour the pixel to black and copy it for simulating engraving
             pix_ref.Recolor([0, 0, 0, 1])
@@ -304,9 +310,10 @@ class Engrave:
         Moves the cover into the engraving environment with the engraving plate
         """
 
-        # Initialize the moving_plate and its reference frame
+        # Initialize the moving_plate and its reference frame and set the speed
         robot = self.RDK.Item('moving_plate')
         plate_ref = self.RDK.Item('engraving_plate_ref', 3)
+        robot.setSpeed(300)
 
         # Set the position of the engraving plate, set the reference frame of the plate and move it to the position
         position_engraving = Pose(318, 0, 16.3, 0, 0, 0)
@@ -318,9 +325,10 @@ class Engrave:
         Moves the cover from the engraving environment with the engraving plate
         """
 
-        # Initialize the moving_plate and its reference frame
+        # Initialize the moving_plate and its reference frame and set the speed
         robot = self.RDK.Item('moving_plate')
         plate_ref = self.RDK.Item('engraving_plate_ref', 3)
+        robot.setSpeed(300)
 
         # Set the position of the engraving plate, set the reference frame of the plate and move it to the position
         position_engraving_out = Pose(145, 0, 16.3, 0, 0, 0)
