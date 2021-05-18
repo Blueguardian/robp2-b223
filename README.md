@@ -40,15 +40,15 @@ When the process is finished it will depending on your settings prompt with a "s
 
 **NOTE: The time used in the simulation is not considered equal to the real time used as this is highly dependant on your GPU and CPU**
 
-#### Time note:
+##### Time note:
 The time used on engraving is highly dependant on the complexity of the image and the desired quality (not changeable by user). This means that the more complex
 the image is the longer it takes for the engraving to be completed, therefore not always completing in the required time. The time used can be changed by changing the quality of the engraving in the script (decreasing or increasing the _PIXEL_SIZE field in engraving.py), this will have a high impact on time, but the image quickly becomes fragmented and blurry by lowering (increasing _PIXEL_SIZE field) the quality. By increasing the quality (decreasing _PIXEL_SIZE field) the time quickly increases to above the desired time.
 
-**The script called 'restock':**
+#### The script called 'restock':
 The restock script MUST only be used on a hard reset of the simulation as this resets the sim stock, without changing the amount of covers left in the storage container. The reasoning behind not creating a script adding alle the covers again is that after each object added to RoboDK the simulation has to wait 60 seconds
 before another action can be performed (Stated in the API code) The would add up to 90 minutes to include all covers again.
 
-**The script called 'call_stat':**
+#### The script called 'call_stat':
 The call stat or call statistics script is for showing the amount of different covers created along with how many of these that have been engraved. This is the 
 data that is simulated for integrating Industry 4.0 intro the project, as this alloweds data to be collected of how many covers of each type is created.
 
