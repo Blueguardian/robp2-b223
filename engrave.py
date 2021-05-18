@@ -129,6 +129,7 @@ class Engrave:
             robot.MoveL(path_target)
 
         # When done engraving move the robot home and move the phone out of the engraving environment
+        # Note: the real home position of the engraver is very error prone as is therefore omitted from here
         robot.MoveJ(Pose(0, -23.3, -259, 0, 0, 90))
         self.move_from_environment()
 
@@ -208,6 +209,7 @@ class Engrave:
             robot.MoveL(path_target)
 
         # When done engraving move the robot home and move the phone out of the engraving environment
+        # Note: the real home position of the engraver is very error prone as is therefore omitted from here
         robot.MoveJ(Pose(0, -23.3, -259, 0, 0, 90))
         self.move_from_environment()
 
@@ -289,6 +291,7 @@ class Engrave:
             robot.MoveL(path_target)
 
         # When done engraving move the robot home and move the phone out of the engraving environment
+        # Note: the real home position of the engraver is very error prone as is therefore omitted from here
         robot.MoveJ(Pose(0, -23.3, -259, 0, 0, 90))
         self.move_from_environment()
 
