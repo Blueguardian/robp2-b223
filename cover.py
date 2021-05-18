@@ -9,6 +9,8 @@ from robolink.robolink import Robolink
 from config import CaseConfig
 from stock import Stock
 from statistics import Statistics
+from datetime import datetime
+from timer import Timer
 
 
 class Cover:
@@ -127,12 +129,9 @@ class Cover:
             self.position[2, 3] = self.position[2, 3] + stock.get(
                 f'{self.color}_none') * self._OFFSETZ_COVER_FLAT_DIST
         if identifier_curve in range(3, 6):
-            print(self.position)
             self.position[2, 3] = self.position[2, 3] + stock.get(
                 f'{self.color}_edge') * self._OFFSETZ_COVER_EDGE_DIST
-            print(self.position)
         if identifier_curve in range(6, 9):
-            print(self.position)
             self.position[2, 3] = self.position[2, 3] + stock.get(
                 f'{self.color}_curved') * self._OFFSETZ_COVER_CURVED_DIST
 
@@ -198,11 +197,12 @@ class Cover:
         # Add the used cover to statistics for later collection of data
         self.stock.sub(f'{self.color}_{self.curve}', 1)
 
-    def give_top(self):
+    def give_top(self, time: Timer):
         """
         Sends instructions to RoboDK to grab a cover, place it on top of the bottom cover
         if the cover needs to be engraved, places it on the engraving plate.
         """
+        start = datetime.now()
         # Carrier positions in relation to it's reference frame
         carrier_offsetx = 88.7  # (Carrier length / 2)
         carrier_offsety = 55.3  # (Carrier width / 2)
@@ -257,6 +257,8 @@ class Cover:
         # If the cover needs engraving
         if CaseConfig.engrave():
 
+            time.end('average_production_time', start)
+
             # Add approach distance to the position and move the robot there and reset the speed
             carrier_position_app[2, 3] = carrier_position_app[2, 3] + self._APPROACH
             robot.MoveL(carrier_position_app)
@@ -309,6 +311,7 @@ class Cover:
 
         # If the cover doesn't need engraving
         else:
+            time.end('average_production_time', start)
 
             # Create a tool object and Detach all children from it
             tool_suction_ = self.RDK.Item('tool_suction', 4)
@@ -321,6 +324,8 @@ class Cover:
             # Reset speed and move the robot to it's home position
             robot.setSpeed(900)
             robot.MoveJ(robot.JointsHome())
+
+
 
     def retrieve(self):
         """
