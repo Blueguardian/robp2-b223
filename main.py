@@ -24,7 +24,7 @@ RDK = Robolink()
 RDK.setSimulationSpeed(1)
 stock = Stock()  # For simulating stock
 time = Timer()
-start = datetime.now()
+start = datetime.now() # For timing simulation
 #Creates a new cover object, and checks whether a cover previously used is existant, if it is it deletes it
 cover = Cover(CaseConfig.colour(), CaseConfig.curve_style(), stock)
 cover.new_cover_check()
@@ -46,4 +46,5 @@ else:
         if CaseConfig.curve_style() == 'curved':
             pattern.begin_curved(time)
         cover.retrieve()
+    # End the timer and add it to the total average time
     time.end('average_total_time', start)

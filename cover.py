@@ -202,7 +202,9 @@ class Cover:
         Sends instructions to RoboDK to grab a cover, place it on top of the bottom cover
         if the cover needs to be engraved, places it on the engraving plate.
         """
+        # Start the timer
         start = datetime.now()
+
         # Carrier positions in relation to it's reference frame
         carrier_offsetx = 88.7  # (Carrier length / 2)
         carrier_offsety = 55.3  # (Carrier width / 2)
@@ -257,6 +259,7 @@ class Cover:
         # If the cover needs engraving
         if CaseConfig.engrave():
 
+            # End the timer and add it to the production time average
             time.end('average_production_time', start)
 
             # Add approach distance to the position and move the robot there and reset the speed
@@ -311,6 +314,8 @@ class Cover:
 
         # If the cover doesn't need engraving
         else:
+
+            # End the timer and add it to the production time average
             time.end('average_production_time', start)
 
             # Create a tool object and Detach all children from it

@@ -7,8 +7,6 @@ from math import sqrt, pow, fabs
 from timer import Timer
 from datetime import datetime
 
-import os
-
 
 class Engrave:
     _APPROACH = 100  # Approach distance in mm
@@ -149,7 +147,7 @@ class Engrave:
         Instructions sent to the robot in RoboDK for engraving the curved edges cover depending on the file given
         """
 
-        # Initialization of the robot, reference frame, tool and the pixel object
+        # Initialization of the robot, reference frame, tool and the pixel object and start the timer
         start = datetime.now()
         robot = self.RDK.Item('engraver', 2)
         robot.setSpeed(1200)
@@ -225,6 +223,8 @@ class Engrave:
         # Add the engraving to the statistics
         stat_str = self.color + '_' + self.curve + '_engraved'
         self.stat.add(stat_str, 1)
+
+        # End the timer with the engraving time and add it to the average
         time.end('average_engraving_time', start)
 
     def begin_curved(self, time: Timer):
@@ -233,7 +233,7 @@ class Engrave:
         Instructions sent to the robot in RoboDK for engraving the curved cover depending on the file given
         """
 
-        # Initialization of the robot, reference frame, tool and the pixel object
+        # Initialization of the robot, reference frame, tool and the pixel object and start the timer
         start = datetime.now()
         robot = self.RDK.Item('engraver', 2)
         robot.setSpeed(1200)
@@ -311,6 +311,8 @@ class Engrave:
         # Add the engraving to the statistics
         stat_str = self.color + '_' + self.curve + '_engraved'
         self.stat.add(stat_str, 1)
+
+        # End the timer with the engraving time and add it to the average
         time.end('average_engraving_time', start)
 
     def move_to_environment(self):
