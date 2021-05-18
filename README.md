@@ -29,7 +29,7 @@ The simulation is based on calculations in RoboDK, which cannot is NOT entirely 
 The simulation can do a couple of thins that will be introduced and documented here:
 
 ### Simulation scripts
-**The script called 'main':**
+#### The script called 'main':
 The main script of the simulation opens a GUI where you can select what colour top- and bottom cover you would like to have produced along with options for
 curvature of the cover. The GUI also includes options for engraving, one asking the user if theu would like the phone engraved and an option for uploading your
 own .scg image for engraving.
