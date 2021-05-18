@@ -319,27 +319,33 @@ class Cover:
     def retrieve(self):
         """
         Retrieves the cover from the engraving plate and places it on the pallette
+        Thereby finishing the production of an engraved cover
         """
+
+        # Initialize moving plate tool object and detach all children of the object.
         move_plate_tool = self.RDK.Item('engraving_plate', 4)
         move_plate_tool.DetachAll()
+
+        # Initialize the reference frame of the engraving plate, the robot and set the robot reference frame to the
+        # frame of the engraving plate
         engrave_plate_ref = self.RDK.Item('engraving_plate_ref', 3)
         robot = self.RDK.Item('fanuc', 3)
         robot.setPoseFrame(engrave_plate_ref)
 
+        # Initialize the position of the engraving plate
         engrave_plate_pos_app = Pose(145.29, 0.05, 42.5, -180, 0, 90)
-        robot.setSpeed(50)
 
+        # Apply approach distance to the position and move the robot there
         if self.curve == 'none':
             engrave_plate_pos_app[2, 3] = engrave_plate_pos_app[2, 3] + self._APPROACH
         elif self.curve == 'edge':
             engrave_plate_pos_app[2, 3] = engrave_plate_pos_app[2, 3] + self._APPROACH
         else:
             engrave_plate_pos_app[2, 3] = engrave_plate_pos_app[2, 3] + self._APPROACH
-
-
         robot.MoveJ(engrave_plate_pos_app)
-        engrave_plate_pos = engrave_plate_pos_app
 
+        # Initialize new position variable with the old and subtract the approach distance along with an offset
+        engrave_plate_pos = engrave_plate_pos_app
         if self.curve == 'none':
             engrave_plate_pos[2, 3] = engrave_plate_pos[2, 3] - self._APPROACH - 0.25
         elif self.curve == 'edge':
@@ -347,36 +353,42 @@ class Cover:
         else:
             engrave_plate_pos[2, 3] = engrave_plate_pos[2, 3] - self._APPROACH
 
-        robot.setSpeed(50)
+        # Move the robot to the new position and attach the phone to it
         robot.MoveL(engrave_plate_pos)
         self.RDK.RunProgram('Prog6')
         self.RDK.RunProgram('Prog7')
 
+        # Apply approach distance to the position and move the robot there
         if self.curve == 'none':
             engrave_plate_pos_app[2, 3] = engrave_plate_pos_app[2, 3] + self._APPROACH
         elif self.curve == 'edge':
             engrave_plate_pos_app[2, 3] = engrave_plate_pos_app[2, 3] + self._APPROACH
         else:
             engrave_plate_pos_app[2, 3] = engrave_plate_pos_app[2, 3] + self._APPROACH
-
         robot.MoveJ(engrave_plate_pos_app)
+
+        # Cover position coordinates relative to the carrier reference frame reference frame
         carrier_offsetx = 88.7  # (Carrier length / 2)
         carrier_offsety = 55.3  # (Carrier width / 2)
         carrier_offsetz = 42.3  # (Carrier depth)
 
-
+        # Initialize position field with position of the carrier
         carrier_position_app = Pose(carrier_offsetx, carrier_offsety, carrier_offsetz, -180, 0, -90)
+
+        # Initialize frame object of the carrier and set the reference frame of the robot to the given frame
         carrier_ = self.RDK.Item('carrier', 3)
         robot.setPoseFrame(carrier_)
 
+        # Apply the approach distance to the position and move the robot there
         if self.curve == 'none':
             carrier_position_app[2, 3] = carrier_position_app[2, 3] + self._APPROACH
         if self.curve == 'edge':
             carrier_position_app[2, 3] = carrier_position_app[2, 3] + self._APPROACH
         if self.curve == 'curved':
             carrier_position_app[2, 3] = carrier_position_app[2, 3] + self._APPROACH
-
         robot.MoveJ(carrier_position_app)
+
+        # Initialize new position field
         position_withoffset = carrier_position_app
 
         # Check the type of cover again and subtract the approach offset,
@@ -389,15 +401,14 @@ class Cover:
             position_withoffset[2, 3] = position_withoffset[
                                             2, 3] - self._APPROACH + self._OFFSETZ_COVER_CURVED_DIST - 5
 
-        # Take into account that it is now a whole phone
+        # Take into account that it is now a whole phone and move the robot to the position
         position_withoffset[2, 3] = position_withoffset[
                                         2, 3] - self._TOP_COVER_INDENT_OFFSET + self._BOTTOM_COVER_HEIGHT
-
-        robot.setSpeed(150)
         robot.MoveL(position_withoffset)
-        robot.setSpeed(500)
+
+        # Initialize the tool and detach all children of the tool and move the robot home
         tool_suction_ = self.RDK.Item('tool_suction', 4)
-        tool_suction_.DetachAll()  # Detach all objects from the robot
+        tool_suction_.DetachAll()
         robot.MoveJ(robot.JointsHome())
 
     def new_cover_check(self):
