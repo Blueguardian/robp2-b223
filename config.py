@@ -74,7 +74,7 @@ class CaseConfig:
         """
         file_path = cls.__open_config().get(type_, 'file')
 
-        if not os.path.isfile(file_path):
+        if not os.path.isfile(file_path) and not file_path == '':
             raise FileNotFoundError('Error, file does not exist.')
 
         # ... other error handling, validation, or mutation
