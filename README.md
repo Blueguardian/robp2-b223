@@ -61,3 +61,14 @@ When the storage container is empty, or your would like to refill the storage co
 saving it, and reopening it, this can be done by right-clicking the station folder in the and selecting 'close'.
 Reopening it can either be done by selecting 'file' in the top menu and selecting the 'open' option and browsing for it again, or pressing Ctrl+1 on your keyboard.
 
+## Note for .svg files
+The provided svg files should, for quality reasons, be processed before trying them in the simulation the following list should contain advice on how to achieve a great outcome. As only the outline of the svg image will be engraved on the phone don't consider coloured surfaces as a part of the engraving.
+
+**.svg files**
+The only accepted filetype for the simulation is .svg this filetype can be created by running your .png, .jpeg or any other image file through Inkscape or other programs like it.
+
+**cropped to content**
+Before processing the svg, it would be a good idea to crop the image to the content you want engraved as to achieve better quality of the final engraving. This can be done though GIMP or some other image processing software. Cropped to content means that the image whitespace is removed in a square around the content.
+
+**black and white contrast**
+Applying a high contrast to an image helps the .svg processing software to create the correct paths for the engraving. Changing contrast can either be done in inkscape when creating the .svg file or in any other image processing software with the ability to change contrast on images.
