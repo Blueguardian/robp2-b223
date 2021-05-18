@@ -52,6 +52,8 @@ before another action can be performed (Stated in the API code) The would add up
 The call stat or call statistics script is for showing the amount of different covers created along with how many of these that have been engraved. This is the 
 data that is simulated for integrating Industry 4.0 intro the project, as this alloweds data to be collected of how many covers of each type is created.
 
+This script will also give an average of the time it takes to assemble each cover, the time it takes to engrave each cover and an average of the total time of each operation.
+
 ### Running scripts
 Each script can be run by either double-clicking the sciprt in the content tree in RoboDK, or by right-clicking and selecting 'run python script'.
 The scripts can also be run external from RoboDK either in a command prompt/terminal, in an API or any other way possible for running python scripts, the only
