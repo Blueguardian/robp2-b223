@@ -30,7 +30,6 @@ class Statistics:
         String method:
         Prints a string containing relevant information about the object itself
         """
-
         statistics_ = self.__get_statistics()
         statistics_ = str(statistics_)
         statistics_ = str(statistics_).replace(', ', '\n').replace('{', '').replace('}', '').replace('\'', '').replace(

@@ -100,9 +100,9 @@ class CaseConfig:
     def bottom_colour(cls, type_='customer'):
         """
         Static class method
-        Checks the value at 'colour' from the config file
+        Checks the value at 'bottom' from the config file
         :param type_: string default 'customer' can be 'default'
-        :return: string contained in key 'colour'
+        :return: string contained in key 'bottom'
         """
         bottom_colour_id = cls.__open_config().get(type_, 'bottom')
 
@@ -124,6 +124,14 @@ class CaseConfig:
 
     @classmethod
     def set_var(cls, key_, value, type_='customer'):
+        """
+        Static class method
+        Sets the value of the given key in the header(type) to the given parameter "value"
+        :param key_: The key to set
+        :param value: The value to give the key
+        :param type_: The type, default set to customer
+        :return: A rewritten config file
+        """
         if key_ == 'file':
             if not os.path.isfile(value) and value != '':
                 raise FileNotFoundError('Error, file does not exist')

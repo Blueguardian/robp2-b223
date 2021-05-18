@@ -4,6 +4,8 @@
 from statistics import Statistics
 from robolink import *
 
+# Opens a dialog with statistic information
+# about how many covers that has been produced
 RDK = Robolink()
 stat = Statistics(RDK)
 stat.__str__()
