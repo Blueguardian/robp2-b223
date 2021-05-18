@@ -9,12 +9,12 @@ import os
 
 
 class Engrave:
-    _APPROACH = 100
-    IMAGE_SIZE_NONE = svg.Point(104, 50)  # size of the image in MM not including edge (2mm)
-    IMAGE_SIZE_EDGE = svg.Point(102, 38)  # size of image in MM not including edge (??? mm)
-    IMAGE_SIZE_CURVED = svg.Point(108, 56)  # size of image in MM not including edge (??? mm)
+    _APPROACH = 100  # Approach distance in mm
+    IMAGE_SIZE_NONE = svg.Point(104, 50)  # size of the image in MM not including edge
+    IMAGE_SIZE_EDGE = svg.Point(100, 36)  # size of image in MM not including edge
+    IMAGE_SIZE_CURVED = svg.Point(108, 56)  # size of image in MM not including edge
     stock = Stock()
-    _PIXEL_SIZE = 0.5
+    _PIXEL_SIZE = 0.5  # For calculating the arc length of the images
 
     def __init__(self, rdk):
         """
@@ -61,7 +61,7 @@ class Engrave:
     def begin_flat(self):
         """
         Engraving for flat covers
-        Instructions sent to the robot in RoboDK for engraving the cover depending on the file given
+        Instructions sent to the robot in RoboDK for engraving the flat cover depending on the file given
         """
 
         # Initialization of the robot, reference frame, tool and the pixel object
@@ -81,15 +81,15 @@ class Engrave:
 
         # Place the image centered on the cover based on the image size
         size_img = self.svg.size_poly()
-        placement_var = -21.3+self.IMAGE_SIZE_NONE.x/2-size_img.x/2
+        placement_var = -19+self.IMAGE_SIZE_NONE.x/2-size_img.x/2
 
-        # For each path
+        # For each path in the svg
         for path in self.svg:
 
             # Align the image with the cover
-            path.polygon_move(-27, placement_var)
+            path.polygon_move(-25.5, placement_var)
 
-            # Recolour the pixel to black and copy it
+            # Recolour the pixel to black and copy it for simulating engraving
             pix_ref.Recolor([0, 0, 0, 1])
             pix_ref.Copy()
 
@@ -106,7 +106,7 @@ class Engrave:
             target0 = transl(point_0.x, point_0.y, -299) * orient_frame2tool * Pose(0, 0, 0, -180, 0, 270)
             robot.MoveL(target0)
 
-            # Set the color
+            # Set the color in RoboDK
             self.RDK.RunProgram('SetColorRGB(%.3f,%.3f,%.3f)' % (
                 0, 0, 0))
 
@@ -129,7 +129,7 @@ class Engrave:
             robot.MoveL(path_target)
 
         # When done engraving move the robot home and move the phone out of the engraving environment
-        robot.MoveJ(robot.JointsHome())
+        robot.MoveJ(Pose(0, -23.3, -259, 0, 0, 90))
         self.move_from_environment()
 
         # Add the engraving to the statistics
@@ -139,139 +139,187 @@ class Engrave:
     def begin_edge(self):
         """
         Engraving for curved edges covers
-
-        Instructions sent to the robot in RoboDK for engraving the cover depending on the file given
+        Instructions sent to the robot in RoboDK for engraving the curved edges cover depending on the file given
         """
+
+        # Initialization of the robot, reference frame, tool and the pixel object
         robot = self.RDK.Item('engraver', 2)
         item_frame = self.RDK.Item('engrave_flat', 3)
         tool_frame = self.RDK.Item('laser_tool', 4)
         pix_ref = self.RDK.Item('pixel', 5)
-        self.move_to_environment()
-        stock_str = self.color + '_' + self.curve
-        stock_int = self.stock.get(f'{self.color}_{self.curve}')
-        stock_int = stock_int + 1
-        item = self.RDK.Item(f'cover_{self.color}_edge_{stock_int}', 5)
 
+        # Move the phone into the environment
+        self.move_to_environment()
+
+        # Initialize the cover to engrave upon
+        item = self.RDK.Item(f'cover_{self.color}_edge_{self.stock.get(f"{self.color}_{self.curve}") + 1}', 5)
+
+        # Resize the svg to the engraveable surface on the cover
         self.svg.calc_polygon_fit(self.IMAGE_SIZE_EDGE, self._PIXEL_SIZE)
+
+        # Place the image centered on the cover based on the image size
         size_img = self.svg.size_poly()
-        placement_var = -21.3+self.IMAGE_SIZE_EDGE.x/2-size_img.x/2
+        placement_var = -15+self.IMAGE_SIZE_EDGE.x/2-size_img.x/2
+
+        # For each path in the svg
         for path in self.svg:
-            path.polygon_move(-20.25, placement_var)
-            # use the pixel reference to set the path color, set pixel width and copy as a reference
-            print('Drawing %s, RGB color = [%.3f,%.3f,%.3f]' % (
-                path.idname, 0, 0, 0))
+
+            # Align the image with the cover
+            path.polygon_move(-20.45, placement_var)
+
+            # Recolour the pixel to black and copy it for simulating engraving
             pix_ref.Recolor([0, 0, 0, 1])
             pix_ref.Copy()
+
+            # Get the first point on the image and switch it coordinates to get the correct rotation
             point_quantity = path.nPoints()
             point_0 = path.getPoint(0)
             point_0.switchXY()
+
+            # Calculate a matrix for orienting the pose to the tool
             orient_frame2tool = invH(item_frame.Pose()) * robot.SolveFK(robot.JointsHome()) * tool_frame.Pose()
             orient_frame2tool[0:3, 3] = Mat([0, 0, 0])
+
+            # Get the first target, and align it with the tool and move the robot there
             target0 = transl(point_0.x, point_0.y, -296.38) * orient_frame2tool * Pose(0, 0, 0, -180, 0, 270)
             target0_app = target0
             robot.MoveL(target0_app)
 
-            self.RDK.RunMessage('Drawing %s' % path.idname)
+            # Set the color in RoboDK
             self.RDK.RunProgram('SetColorRGB(%.3f,%.3f,%.3f)' % (
                 0, 0, 0))
 
+            # For each point in the given path
             for point in range(point_quantity):
+
+                # Get the point and switch the coordinates for correct rotation
                 path_point = path.getPoint(point)
                 path_point.switchXY()
-                path_vector = path.getVector(point)
-                point_pose = self.point2d_2_pose(path_point, path_vector)
+
+                # Calculate the target based on the points, a height and orientation of the tool and move the engraver
                 path_target = transl(path_point.x, path_point.y, -296.38) * orient_frame2tool * Pose(0, 0, 0, -180, 0, 270)
-                print(path_target)
                 robot.MoveL(path_target)
 
-                # create a new pixel object with the calculated pixel pose
+                # create a new pixel object with the calculated pixel pose and add it to the cover
                 point_pose = transl(path_point.x + 5.2, 14.75, -path_point.y + 67.55) * orient_frame2tool * Pose(0, 0, 0, 90, 0, 0)
                 item.AddGeometry(pix_ref, point_pose)
-            target_app = path_target
-            robot.MoveL(target_app)
 
-        robot.MoveJ(robot.JointsHome())
+            # Move to the end point
+            robot.MoveL(path_target)
+
+        # When done engraving move the robot home and move the phone out of the engraving environment
+        robot.MoveJ(Pose(0, -23.3, -259, 0, 0, 90))
         self.move_from_environment()
+
+        # Add the engraving to the statistics
         stat_str = self.color + '_' + self.curve + '_engraved'
         self.stat.add(stat_str, 1)
 
     def begin_curved(self):
         """
         Engraving for curved covers
-
-        Instructions sent to the robot in RoboDK for engraving the cover depending on the file given
+        Instructions sent to the robot in RoboDK for engraving the curved cover depending on the file given
         """
+
+        # Initialization of the robot, reference frame, tool and the pixel object
         robot = self.RDK.Item('engraver', 2)
         item_frame = self.RDK.Item('engrave_flat', 3)
         tool_frame = self.RDK.Item('laser_tool', 4)
         pix_ref = self.RDK.Item('pixel', 5)
-        self.move_to_environment()
-        stock_str = self.color + '_' + self.curve
-        stock_int = self.stock.get(f'{self.color}_{self.curve}')
-        stock_int = stock_int + 1
-        item = self.RDK.Item(f'cover_{self.color}_curved_{stock_int}', 5)
-        robot.setSpeed(1000)
 
+        # Move the phone into the environment
+        self.move_to_environment()
+
+        # Initialize the cover to engrave upon
+        item = self.RDK.Item(f'cover_{self.color}_curved_{self.stock.get(f"{self.color}_{self.curve}")+1}', 5)
+
+        # Resize the svg to the engraveable surface on the cover
         self.svg.calc_polygon_fit(self.IMAGE_SIZE_CURVED, self._PIXEL_SIZE)
+
+        # Place the image centered on the cover based on the image size
         size_img = self.svg.size_poly()
         placement_var = -21.3+self.IMAGE_SIZE_CURVED.x/2-size_img.x/2
+
+        # For each path in the svg
         for path in self.svg:
+
+            # Align the image with the cover
             path.polygon_move(-29.5, placement_var)
-            # use the pixel reference to set the path color, set pixel width and copy as a reference
-            print('Drawing %s, RGB color = [%.3f,%.3f,%.3f]' % (
-                path.idname, 0, 0, 0))
+
+            # Recolour the pixel to black and copy it for simulating engraving
             pix_ref.Recolor([0, 0, 0, 1])
             pix_ref.Copy()
+
+            # Get the first point on the image and switch it coordinates to get the correct rotation
             point_quantity = path.nPoints()
             point_0 = path.getPoint(0)
             point_0.switchXY()
+
+            # Calculate a matrix for orienting the pose to the tool
             orient_frame2tool = invH(item_frame.Pose()) * robot.SolveFK(robot.JointsHome()) * tool_frame.Pose()
             orient_frame2tool[0:3, 3] = Mat([0, 0, 0])
+
+            # Get the first target, and align it with the tool and move the robot there
             target0 = transl(point_0.x, point_0.y, -302.1+self.curved_add_z(point_0.y)) * orient_frame2tool * Pose(0, 0, 0, -180, 0, 270)
             target0_app = target0
             robot.MoveL(target0_app)
 
-            self.RDK.RunMessage('Drawing %s' % path.idname)
+            # Set the color in RoboDK
             self.RDK.RunProgram('SetColorRGB(%.3f,%.3f,%.3f)' % (
                 0, 0, 0))
 
+            # For each point in the given path
             for point in range(point_quantity):
+
+                # Get the point and switch the coordinates for correct rotation
                 path_point = path.getPoint(point)
                 path_point.switchXY()
-                path_vector = path.getVector(point)
-                point_pose = self.point2d_2_pose(path_point, path_vector)
-                path_target = transl(path_point.x, path_point.y, -302.1 + self.curved_add_z(path_point.y)) * orient_frame2tool * Pose(0, 0, 0, -180, 0, 270)
 
+                # Calculate the target based on the points, a height and orientation of the tool and move the engraver
+                path_target = transl(path_point.x, path_point.y, -302.1 + self.curved_add_z(path_point.y)) * orient_frame2tool * Pose(0, 0, 0, -180, 0, 270)
                 robot.MoveL(path_target)
 
                 # create a new pixel object with the calculated pixel pose 20.67
                 point_pose = transl(path_point.x + 5.2, 8.8+self.curved_add_z(path_point.y), -path_point.y +67.55) * orient_frame2tool * Pose(0, 0, 0, 90, 0, 0)
-                print(point_pose)
-                item.AddGeometry(pix_ref, point_pose)
-            target_app = path_target
-            robot.MoveL(target_app)
 
+                # create a new pixel object with the calculated pixel pose and add it to the cover
+                item.AddGeometry(pix_ref, point_pose)
+
+            # Move to the end point
+            robot.MoveL(path_target)
+
+        # When done engraving move the robot home and move the phone out of the engraving environment
         robot.MoveJ(Pose(0, -23.3, -259, 0, 0, 90))
         self.move_from_environment()
+
+        # Add the engraving to the statistics
         stat_str = self.color + '_' + self.curve + '_engraved'
         self.stat.add(stat_str, 1)
 
     def move_to_environment(self):
         """
-        Moves the cover into the engraving environment
+        Moves the cover into the engraving environment with the engraving plate
         """
+
+        # Initialize the moving_plate and its reference frame
         robot = self.RDK.Item('moving_plate')
         plate_ref = self.RDK.Item('engraving_plate_ref', 3)
+
+        # Set the position of the engraving plate, set the reference frame of the plate and move it to the position
         position_engraving = Pose(318, 0, 16.3, 0, 0, 0)
         robot.setPoseFrame(plate_ref)
         robot.MoveL(position_engraving)
 
     def move_from_environment(self):
         """
-        Moves the cover from the engraving environment
+        Moves the cover from the engraving environment with the engraving plate
         """
+
+        # Initialize the moving_plate and its reference frame
         robot = self.RDK.Item('moving_plate')
         plate_ref = self.RDK.Item('engraving_plate_ref', 3)
+
+        # Set the position of the engraving plate, set the reference frame of the plate and move it to the position
         position_engraving_out = Pose(145, 0, 16.3, 0, 0, 0)
         robot.setPoseFrame(plate_ref)
         robot.MoveL(position_engraving_out)
