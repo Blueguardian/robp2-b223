@@ -67,7 +67,7 @@ class Engrave:
         # Initialization of the robot, reference frame, tool and the pixel object and set the speed
         start = datetime.now()
         robot = self.RDK.Item('engraver', 2)
-        robot.setSpeed(1200)
+        robot.setSpeed(250)
         robot.setAcceleration(2000)
         item_frame = self.RDK.Item('engrave_flat', 3)
         tool_frame = self.RDK.Item('laser_tool', 4)
@@ -150,7 +150,7 @@ class Engrave:
         # Initialization of the robot, reference frame, tool and the pixel object and start the timer
         start = datetime.now()
         robot = self.RDK.Item('engraver', 2)
-        robot.setSpeed(1200)
+        robot.setSpeed(250)
         robot.setAcceleration(2000)
         item_frame = self.RDK.Item('engrave_flat', 3)
         tool_frame = self.RDK.Item('laser_tool', 4)
@@ -236,7 +236,7 @@ class Engrave:
         # Initialization of the robot, reference frame, tool and the pixel object and start the timer
         start = datetime.now()
         robot = self.RDK.Item('engraver', 2)
-        robot.setSpeed(1200)
+        robot.setSpeed(250)
         robot.setAcceleration(2000)
         item_frame = self.RDK.Item('engrave_flat', 3)
         tool_frame = self.RDK.Item('laser_tool', 4)
