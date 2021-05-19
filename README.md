@@ -31,8 +31,8 @@ The simulation can do a couple of thins that will be introduced and documented h
 ### Simulation scripts
 #### The script called 'main':
 The main script of the simulation opens a GUI where you can select what colour top- and bottom cover you would like to have produced along with options for
-curvature of the cover. The GUI also includes options for engraving, one asking the user if theu would like the phone engraved and an option for uploading your
-own .scg image for engraving.
+curvature of the cover. The GUI also includes options for engraving, one asking the user if they would like the phone engraved and an option for uploading your
+own .scg image for engraving. If an en engraving is desired but not provided it will provide a default image for the customer.
 
 When you are done selecting the options you would like for your phone, click the button marked "Order" in the bottom of the GUI. The process of creating the phone
 will then begin, to speed up the process you can change perspective to the engraving environment (the small black box) as rendering this from afar is quite slow). 
@@ -51,6 +51,8 @@ before another action can be performed (Stated in the API code) The would add up
 #### The script called 'call_stat':
 The call stat or call statistics script is for showing the amount of different covers created along with how many of these that have been engraved. This is the 
 data that is simulated for integrating Industry 4.0 intro the project, as this alloweds data to be collected of how many covers of each type is created.
+
+This script will also give an average of the time it takes to assemble each cover, the time it takes to engrave each cover and an average of the total time of each operation.
 
 ### Running scripts
 Each script can be run by either double-clicking the sciprt in the content tree in RoboDK, or by right-clicking and selecting 'run python script'.
