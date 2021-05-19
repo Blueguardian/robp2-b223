@@ -39,7 +39,7 @@ class Timer:
                 self.time_avg =+ self.stat.get(types)
 
             # Set the value in statistics
-            self.stat.set(type_, self.addtoaverage(self.stat.get(type_), self.time_avg, diff))
+            self.stat.set(type_, self.addtoaverage(self.time_avg, self.stat.get(type_), diff))
 
             # Reset the time average variable
             self.time_avg = 0
@@ -50,7 +50,7 @@ class Timer:
                 self.time_avg =+ self.stat.get(f'{types}_engraved')
 
             # Set the value in statistics
-            self.stat.set(type_, self.addtoaverage(self.stat.get(type_), self.time_avg, diff))
+            self.stat.set(type_, self.addtoaverage(self.time_avg, self.stat.get(type_), diff))
 
             # Reset the time average variable
             self.time_avg = 0
@@ -61,7 +61,7 @@ class Timer:
                 self.time_avg =+ self.stat.get(types)
 
             # Set the value in statistics
-            self.stat.set(type_, self.addtoaverage(self.stat.get(type_), self.time_avg, diff))
+            self.stat.set(type_, self.addtoaverage(self.time_avg, self.stat.get(type_), diff))
 
             # Reset the time average variable
             self.time_avg = 0
