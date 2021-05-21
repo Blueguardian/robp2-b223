@@ -77,5 +77,8 @@ class Timer:
         :param value: The new value to add
         :return: The new average of all the operations
         """
-        return (size * average + value) / (size + 1)
+        # Due to the size being calculated before the call of this function, we
+        # have to subtract one from the size initially
+        # Adds an element to the average
+        return (size-1 * average + value) / (size)
 
